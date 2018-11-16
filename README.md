@@ -44,3 +44,11 @@ locally by hand:
 # live update for compiled pdf
 
 Use ``gv -watch foo.pdf``.
+
+# build a ps file to convert it into PDF online
+
+```
+# docker run --rm -it -v $(pwd):/home bogdando/texlive latexmk -ps foo.tex
+```
+Then convert the resulting PS file to a PDF with an online converter, like [this one](https://www.ps2pdf.com/convert-ps-to-pdf).
+Note, not an each converter works well for EDAS system...
