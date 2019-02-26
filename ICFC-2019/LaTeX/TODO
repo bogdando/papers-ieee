@@ -1,0 +1,21 @@
+Focus on proposed solutions to address the listed requirements for future work (limit that to positioning only):
+	[ ] RainbowFS: Modular Consistency and Co-designed Massive File system xxxx://rainbowfs . lip6 . fr/data/RainbowFS-2016-04-12 . pdf (from II . 4 . 1 to II . 4 . 6, 2016)
+	[ ] Fast if possible, consistent if necessary xxxx://sites . computer . org/debull/A16mar/p81 . pdf
+	[ ] An unsupervised evidential conflict resolution method for data fusion in IoT xxxxs://ieeexplore . ieee . org/document/8104644
+	[ ] CRDTs: Merging semantics for conflict updates in geo-distributed file systems xxxxs://pages . lip6 . fr/Marc . Shapiro/papers/geodistr-FS-Systor-2015 . pdf
+	[ ] Eiger Stronger Semantics for Low-Latency Geo-Replicated Storage xxxx://www . cs . princeton . edu/~wlloyd/papers/eiger-nsdi13 . pdf
+	[ ] Bolt-on causal consistency xxxx://www . bailis . org/papers/bolton-sigmod2013 . pdf
+	[ ] Highly available transactions: Virtues and limitations xxxx://www . vldb . org/pvldb/vol7/p181-bailis . pdf
+	[ ] SwiftCloud: Write fast, read in the past: Causal consistency for client-side applications xxxxs://hal . inria . fr/hal-01158370v2/document
+	[ ] Antidote: Cure: Strong semantics meets high availability and low latency xxxx://asc . di . fct . unl . pt/~nmp/pubs/icdcs-2016 . pdf
+	[ ] Putting consistency back into eventual consistency xxxx://lip6 . fr/Marc . Shapiro/papers/putting-consistency-back-EuroSys-2015 . pdf
+
+Evaluate correctness verification approaches for future work (out of the positioning paper scope)
+	[ ] CISE: Cause I’m strong enough: Reasoning about consistency choices in distributed systems xxxx://software . imdea . org/~gotsman/papers/logic-popl16 . pdf
+	[ ] CISE: xxxxs://youtu . be/HJjWqNDh-GA
+	[ ] The CISE tool: Proving weakly-consistent applications correct xxxxs://pages . lip6 . fr/Marc . Shapiro/papers/RR-8870 . pdf
+	[ ] Quantifying eventual consistency with PBS xxxx://www . bailis . org/papers/pbs-vldbj2014 . pdf
+	[ ] G-DUR: A middleware for assembling, analyzing, and improving transactional protocols xxxxs://pages . lip6 . fr/Marc . Shapiro/papers/GDUR-Middleware-2014 . pdf
+	[ ] Homeostasis xxxx://www . cs . cornell . edu/~jnfoster/papers/homeostasis . pdf
+	[ ] Bloom xxxx://db . cs . berkeley . edu/papers/cidr11-bloom . pdf
+	[ ] Sieve xxxxs://www . usenix . org/system/files/conference/atc14/atc14-paper-li_cheng . pdf
