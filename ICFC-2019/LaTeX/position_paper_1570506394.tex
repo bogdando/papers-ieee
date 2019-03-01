@@ -151,14 +151,15 @@ API endpoints or command line tooling. E.g. starting a virtual machine
 instance or a Kubernetes pod, or creating an OpenStack Keystone user. Such
 operations are typically initiated by cloud applications, tenants or operators.
 
-\textbf{Replication Topology}: represents a hierarchy for allowed state
+\textbf{Replication Topology}: represents a graph for allowed state
 replication flows and targets for operations on interconnected cloudlets,
-including \textit{edge aggregation layers}\cite{b3}.
-So effectively there is only a limitation for horizontally interconnected
-cloudlets cannot be replicating its state nor targeting operations to each other.
-This corresponds to the acyclic graph (tree) topology.
+including \textit{edge aggregation layers}\cite{b3}. For hierarchical
+topologies, there would be a limitation for horizontally interconnected
+cloudlets cannot be replicating its state nor targeting operations to each
+other. This corresponds to the acyclic graph (tree) topology. There may be
+also P2P topologies\cite{b9} or mixed cases.
 
-For the example graph (Fig.~\ref{fig}), the $\mathrm{infrastructure\ edge}$ can
+For the example tree (Fig.~\ref{fig}), the $\mathrm{infrastructure\ edge}$ can
 replicate data, like contributing its local stats into the global view of
 hardware and performance metrics, to the the edge aggregation layer
 $\mathrm{EAL1}$ omitting the $\mathrm{access\ edge\ layer}$. Meanwhile the
