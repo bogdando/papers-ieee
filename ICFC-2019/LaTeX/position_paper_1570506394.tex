@@ -505,6 +505,20 @@ also covers inter-operability between multiple operators. The latter is an
 important requirement for Network Functions Virtualization (NFV) Edge cases,
 like Virtual Customer Premises Equipment (vCPE) but is not limited to.
 
+A. Lebre et al\cite{b9} bring vision of a unified Peer-to-Peer OpenStack IaaS
+Manager, which is opposed to hierarchical distributed topologies that have
+additional maintenance costs associated with it and require complex operations
+in case of failures. That P2P IaaS Manager is positioned as an alternative
+approach to federated clouds, which always involves brokerage middleware opaque
+for the administrators/users because they cannot supervise the infrastructure
+as they historically are used to. Such a view-point naturally complements the
+vision of unified management plane as we introduced it for this paper. A. Lebre
+et al used the Grid'5000 testbed for the proposed prototype validation purposes.
+Experiments evaluated the use of Rome/Redis KVS as a replacement of
+SQLAlchemy/MySQL for a single site case and distributed Galera cluster for
+the multi-site deployment. The used data backends do not provide causal
+consistency so there is some room remains for future experimenting perhaps.
+
 \section{Conclusion}
 We defined autonomy requirements for multiple control/management planes of
 massively distributed Fog environments and imposed operational invariants off
@@ -549,5 +563,6 @@ OpenStack Summit at Berlin, 2018.
 \bibitem{b6} M. M. Elbushra, J. Lindstrom, ``Causal Consistent Databases'', Open Journal of Databases (OJDB), Volume 2, Issue 1, 2015.
 \bibitem{b7} PRCE (Projet de recherche collaborative — Entreprises), ``RainbowFS: Modular Consistency and Co-designed Massive File'' [Online]. Available: \url{http://rainbowfs.lip6.fr/data/RainbowFS-2016-04-12.pdf}
 \bibitem{b8} R. A. Cherrueau, A. Lebre, D. Pertin, F. Wuhib, J. M. Soares, ``Edge Computing Resource Management System: a Critical Building Block! Initiating the debate via OpenStack'', USENIX HotEdge’18 Workshop, 2018.
+\bibitem{b9} A. Lebre, J. Pastor, A. Simonet, F. Desprez, ``Revising OpenStack to Operate Fog/Edge Computing Infrastructures'', IEEE International Conference on Cloud Engineering (IC2E), 2017.
 \end{thebibliography}
 \end{document}
