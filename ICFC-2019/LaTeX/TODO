@@ -1,3 +1,6 @@
+More positioning for openstack edge computing specifics maybe:
+        [ ] http://beyondtheclouds.github.io/publications.html
+
 Focus on proposed solutions to address the listed requirements for future work (limit that to positioning only):
 	[ ] RainbowFS: Modular Consistency and Co-designed Massive File system xxxx://rainbowfs . lip6 . fr/data/RainbowFS-2016-04-12 . pdf (from II . 4 . 1 to II . 4 . 6, 2016)
 	[ ] Fast if possible, consistent if necessary xxxx://sites . computer . org/debull/A16mar/p81 . pdf
