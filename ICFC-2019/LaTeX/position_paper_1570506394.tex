@@ -36,22 +36,23 @@ to the end users and data sources. Its control plane and deployments data
 synchronization is a major challenge. Autonomy requirements expect even the
 most distant edge sites always manageable, available for monitoring and
 alerting, scaling up/down, upgrading and applying security fixes. Whenever
-temporary disconnected sites are managed locally or centrally, some changes
-and data need to be eventually synchronized back to the central site(s) with
-having its merge-conflicts resolved for the central data hub(s). While some
-data needs to be pushed from the central site(s) to the Edge, which might
-require resolving data collisions at the remote sites as well. In this paper,
-we position the outstanding data synchronization problems for OpenStack
-platform becoming a cloud solution number one for fog computing. We define
-the inter-cloud operational invariants based on that Always Available
-autonomy requirement. We show that a causal consistent data replication is
-the best match for the outlined operational invariants and there is a great
-opportunity for designing such a solution for Edge clouds. Finally, the paper
-brings vision of unified tooling to solve outstanding state synchronization
-problems the same way for infrastructure owners, cloud operators and tenants
-running stateful workloads hosted on OpenStack IaaS or OpenShift/Kubernetes
-PaaS deployed in Edge clouds as multi-cloud workloads abstraction and
-unification layer, to make it truly cloud-vendors agnostic and portable.
+temporary disconnected sites are managed locally or centrally, some changes and
+data need to be eventually synchronized back to the central site(s) with having
+its merge-conflicts resolved for the central data hub(s). While some data needs
+to be pushed from the central site(s) to the Edge, which might require
+resolving data collisions at the remote sites as well. In this paper, we aim at
+initiating discussions and position the outstanding data synchronization
+problems for OpenStack platform becoming a cloud solution number one for fog
+computing. We define the inter-cloud operational invariants based on that
+Always Available autonomy requirement. We show that a causal consistent data
+replication is the best match for the outlined operational invariants and there
+is a great opportunity for designing such a solution for Edge clouds. Finally,
+the paper brings vision of unified tooling to solve outstanding state
+synchronization problems the same way for infrastructure owners, cloud
+operators and tenants running stateful workloads hosted on OpenStack IaaS or
+OpenShift/Kubernetes PaaS deployed in Edge clouds as multi-cloud workloads
+abstraction and unification layer, to make it truly cloud-vendors agnostic and
+portable.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -92,7 +93,10 @@ datacenters won't fit neither the most generous business model nor if limited
 space/weight et al requirements. And such autonomy imposes multiple control and
 configuration management planes to maintain local operations and manageability
 of systems while being offline. In turn, that brings outstanding problems of
-data replication and consistency.
+data replication and consistency. We aim at initating debates through numerous
+communities, foundations and project groups dedicated to building solutions
+for Edge computing cases that involve multiple control planes and multi-site
+operations.
 
 \section{Background Concepts}
 Aside of the established terms\cite{b3}, we define a few more for the data
@@ -493,6 +497,14 @@ RainbowFS\cite{b7} expands on the consistency models and building tools topics.
     benefit workloads consuming these as a service?
 \end{itemize}
 
+STACK Reseach Group\cite{b8} provides a list of the features required to
+operate and use edge computing resources. The listed requirements are
+complementary to this work and represent the operational invariants approached
+from OpenStack developers and operators (DevOps) angle, the view point that
+also covers inter-operability between multiple operators. The latter is an
+important requirement for Network Functions Virtualization (NFV) Edge cases,
+like Virtual Customer Premises Equipment (vCPE) but is not limited to.
+
 \section{Conclusion}
 We defined autonomy requirements for multiple control/management planes of
 massively distributed Fog environments and imposed operational invariants off
@@ -536,5 +548,6 @@ OpenStack Summit at Berlin, 2018.
 \bibitem{b5} M. Bayer, ``Global Galera Database,'' [Online]. Available: \url{https://review.openstack.org/600555}
 \bibitem{b6} M. M. Elbushra, J. Lindstrom, ``Causal Consistent Databases'', Open Journal of Databases (OJDB), Volume 2, Issue 1, 2015.
 \bibitem{b7} PRCE (Projet de recherche collaborative — Entreprises), ``RainbowFS: Modular Consistency and Co-designed Massive File'' [Online]. Available: \url{http://rainbowfs.lip6.fr/data/RainbowFS-2016-04-12.pdf}
+\bibitem{b8} R. A. Cherrueau, A. Lebre, D. Pertin, F. Wuhib, J. M. Soares, ``Edge Computing Resource Management System: a Critical Building Block! Initiating the debate via OpenStack'', USENIX HotEdge’18 Workshop, 2018.
 \end{thebibliography}
 \end{document}
