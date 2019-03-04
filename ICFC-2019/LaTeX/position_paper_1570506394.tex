@@ -474,7 +474,6 @@ supported as a control/management planes data backend for IaaS and PaaS itself.
 So locally, cloudlets would have to be switched to use that data backend as
 well.
 
-RainbowFS\cite{b7} expands on the consistency models and building tools topics.
 \begin{itemize}
   \item \textbf{Open questions}: does COPS work for multiple datacenters
     failure events, up to failure domains of a size of a 1? Is COPS applicable
@@ -503,22 +502,27 @@ operate and use edge computing resources. The listed requirements are
 complementary to this work and represent the operational invariants approached
 from OpenStack developers and operators (DevOps) angle, the view point that
 also covers inter-operability between multiple operators. The latter is an
-important requirement for Network Functions Virtualization (NFV) Edge cases,
-like Virtual Customer Premises Equipment (vCPE) but is not limited to.
+important requirement for hybrid clouds and Network Functions Virtualization
+(NFV) Edge cases, like Virtual Customer Premises Equipment (vCPE).
 
-A. Lebre et al\cite{b9} bring vision of a unified Peer-to-Peer OpenStack IaaS
-Manager, which is opposed to hierarchical distributed topologies that have
-additional maintenance costs associated with it and require complex operations
-in case of failures. That P2P IaaS Manager is positioned as an alternative
-approach to federated clouds, which always involves brokerage middleware opaque
-for the administrators/users because they cannot supervise the infrastructure
-as they historically are used to. Such a view-point naturally complements the
-vision of unified management plane as we introduced it for this paper. A. Lebre
-et al used the Grid'5000 testbed for the proposed prototype validation purposes.
-Experiments evaluated the use of Rome/Redis KVS as a replacement of
-SQLAlchemy/MySQL for a single site case and distributed Galera cluster for
-the multi-site deployment. The used data backends do not provide causal
-consistency so there is some room remains for future experimenting perhaps.
+A. Lebre et al.\cite{b9} bring vision of a Peer-to-Peer (P2P) OpenStack IaaS
+Manager, which is opposed to hierarchical distributed topologies. It is stated
+that P2P saves maintenance costs associated with hierarchies, while the latter
+also require complex operations in case of failures. The unified IaaS Manager is
+positioned as an alternative to stretched control plane and federated clouds.
+It emphasises on challenges of data locality, efficient cloud storage,
+inter-operability peering agreements, autonomous lifecycle tooling and new
+edge-native cloud APIs as paramaunt requirements. Such a view-point naturally
+complements the vision of unified management plane as we introduced it for this
+paper.
+
+The aforementioned future edge-cloud native APIs may be designed with the
+approach that RainbowFS\cite{b7} takes. It focuses on Just-Right (modular)
+Consistency and flexible service level agreements, like latency requirements,
+enforced data locality and smart storage placement strategies unique to
+Fog/Edge platforms and dictated by applications designed for it on case-by-case
+basis. ``Whereby an application pays only the consistency price that it
+strictly requires''\cite{b7}.
 
 \section{Conclusion}
 We defined autonomy requirements for multiple control/management planes of
