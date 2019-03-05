@@ -453,48 +453,44 @@ control/management planes, including those targeted for offline cloudlets, may
 be also processed that way.
 
 \section{Related Work}
-COPS\cite{b1} formally proves implementation of a client library and highly scalable
-tooling for causal+ data operations. By design, it does not impose any
-real-time constraints and supports a single edge datacenter failure. The real
-tooling made off that base, may be operating on top of the not shared local
-cloudlets databases, or KVS, that provide the stronger consistency guarantees
-by the costs of reduced availability for local services. That would work as
-weaker consistency guarantees work well, when built on top of the stronger
-ones, and provide an always available global view of cloudlets for upper
-layers. Replicating the state changes via causal related operations and
-conflicts resolving via custom handlers is that COPS covers as well.
-
-Global causal consistent databases\cite{b6} describes alternative solutions, if
-one can serve on the large scale and provide two-way convergence over high
-latency networks. Or otherwise, multiple shared instances of it, each serving
-to its dedicated virtual datacenter. A causal consistent data storage is the
-most unified and also the most simple way of exposing it for edge-native
-workloads as Replication-as-a-Service. The downside is such a thing has to be
-supported as a control/management planes data backend for IaaS and PaaS itself.
-So locally, cloudlets would have to be switched to use that data backend as
-well.
+COPS\cite{b1} provides theoretical fundamentals for causal+ consistency and
+focuses on highly scalable middleware libraries implementing causal consistent
+data operations. The similar approach is taken for Indigo middleware\cite{b10}
+that gives strong fundamentals on creating application-centric programming
+methodologies that leverage invariant-repair/violation-avoidance techniques and
+rely on immutable data structures (CRDTs). Ultimately, that should help
+programmers to enforce Explicit Consistency by extending existing applications
+logic and building middleware libraries on top of the underlying causal
+consistent storage backends. That is, like Global causal consistent
+databases\cite{b6}. The work presents potential applications and databases that
+could use the causal consistency and shows possible methods to implement that
+model. It also compares serializability, eventual and causal consistency using
+a running example. There is an important conclusion that to the authors’
+knowledge there is no commercial or mature systems using the causal
+consistency.
 
 \begin{itemize}
   \item \textbf{Open questions}: does COPS work for multiple datacenters
-    failure events, up to failure domains of a size of a 1? Is COPS applicable
-    for two-way convergent systems, in terms of\cite{b2}, for bidirectional
-    causal+ replications? Any open source implementations exist for RTC/COPS?
-  \item \textbf{Open questions}: which generic replication cases can be
-    performed one-way? That simplifies implementation a lot: ``Although most
-    implementations use bidirectional communication, the communication from the
-    update-receiver to the update-sender is just a (significant) performance
-    optimization used to avoid redundant transfers of updates already known to
-    the receiver. One-way convergence is also important in protocols that
-    transmit updates via delay tolerant networks''\cite{b2}.
-  \item \textbf{Open questions}: anything to propose for bidirectional state
-    synchronization, without breaking the autonomy requirements? Alternatively,
-    instead of bidirectionally replicating data, may an API-to-API based
-    synchronization mechanisms become a replacement for such cases, like
-    predictable cloud users/projects ID require no databases synchronized?
-  \item \textbf{Open questions}: which of the existing causal consistent
-    databases\cite{b6} or file systems\cite{b7} can be integrated as a global
-    solution that fits all control/management cases for cloudlets and may
-    benefit workloads consuming these as a service?
+    failure events, assuming at the edge there may be a lot of small failure
+    domains? Does it cover bidirectional/two-way convergent causal+ replication?
+  \item \textbf{Open questions}: what generic data replication cases can we
+    break down to be always performed one-way? That simplifies implementation a
+    lot: ``Although most implementations use bidirectional communication, the
+    communication from the update-receiver to the update-sender is just a
+    (significant) performance optimization used to avoid redundant transfers of
+    updates already known to the receiver. One-way convergence is also
+    important in protocols that transmit updates via delay tolerant
+    networks''\cite{b2}. And for the remaining cases, may an API-to-API based
+    synchronization mechanisms fully address the needs for bidirectional data
+    replication? Like predictable cloud users/projects' IDs that require no
+    shared replicating databases.
+  \item \textbf{Open questions}: any opensource implementations yet for causal
+    consistent databases/KVS or midleware, like that RTC/COPS/Indigo etc.
+    describes, to benefit OpenStack/Kubernetes cloud platforms for edge cases
+    that rely on multiple autonomous control planes? If there is any, chances
+    it can be integrated as a unified solution that fits all control/management
+    planes cases for the platform, cloudlets and edge-native workloads? For
+    example, consuming it as Replication-as-a-Service.
 \end{itemize}
 
 STACK Reseach Group\cite{b8} provides a list of the features required to
@@ -508,21 +504,19 @@ important requirement for hybrid clouds and Network Functions Virtualization
 A. Lebre et al.\cite{b9} bring vision of a Peer-to-Peer (P2P) OpenStack IaaS
 Manager, which is opposed to hierarchical distributed topologies. It is stated
 that P2P saves maintenance costs associated with hierarchies, while the latter
-also require complex operations in case of failures. The unified IaaS Manager is
-positioned as an alternative to stretched control plane and federated clouds.
-It emphasises on challenges of data locality, efficient cloud storage,
+also require complex operations in case of failures. The unified IaaS Manager
+is positioned as an alternative to stretched control plane and federated
+clouds.  It emphasises on challenges of data locality, efficient cloud storage,
 inter-operability peering agreements, autonomous lifecycle tooling and new
 edge-native cloud APIs as paramaunt requirements. Such a view-point naturally
 complements the vision of unified management plane as we introduced it for this
-paper.
-
-The aforementioned future edge-cloud native APIs may be designed with the
-approach that RainbowFS\cite{b7} takes. It focuses on Just-Right (modular)
-Consistency and flexible service level agreements, like latency requirements,
-enforced data locality and smart storage placement strategies unique to
-Fog/Edge platforms and dictated by applications designed for it on case-by-case
-basis. ``Whereby an application pays only the consistency price that it
-strictly requires''\cite{b7}.
+paper. The edge-cloud native APIs may be also designed with the approaches that
+Indigo\cite{b10} or RainbowFS\cite{b7} takes. The latter work focuses on
+Just-Right (modular) Consistency and flexible service level agreements, like
+latency requirements, enforced data locality and smart storage placement
+strategies unique to Fog/Edge platforms and dictated by applications designed
+for it on case-by-case basis. ``Whereby an application pays only the
+consistency price that it strictly requires''\cite{b7}.
 
 \section{Conclusion}
 We defined autonomy requirements for multiple control/management planes of
@@ -569,5 +563,6 @@ OpenStack Summit at Berlin, 2018.
 \bibitem{b7} PRCE (Projet de recherche collaborative — Entreprises), ``RainbowFS: Modular Consistency and Co-designed Massive File'' [Online]. Available: \url{http://rainbowfs.lip6.fr/data/RainbowFS-2016-04-12.pdf}
 \bibitem{b8} R. A. Cherrueau, A. Lebre, D. Pertin, F. Wuhib, J. M. Soares, ``Edge Computing Resource Management System: a Critical Building Block! Initiating the debate via OpenStack'', USENIX HotEdge’18 Workshop, 2018.
 \bibitem{b9} A. Lebre, J. Pastor, A. Simonet, F. Desprez, ``Revising OpenStack to Operate Fog/Edge Computing Infrastructures'', IEEE International Conference on Cloud Engineering (IC2E), 2017.
+\bibitem{b10} V. Balegas, N. Preguiça, R. Rodrigues, S. Duarte, C. Ferreira, M. Najafzadeh, M. Shapiro, ``Putting Consistency back into Eventual Consistency'', Euro. Conf. on Computing Systems (EuroSys), Bordeaux, France, 2015.
 \end{thebibliography}
 \end{document}
