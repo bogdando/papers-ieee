@@ -32,27 +32,27 @@ Challenges\\
 
 \begin{abstract}
 Fog computing is an emerging paradigm aiming at bringing cloud functions closer
-to the end users and data sources. Its control plane and deployments data
-synchronization is a major challenge. Autonomy requirements expect even the
-most distant edge sites always manageable, available for monitoring and
-alerting, scaling up/down, upgrading and applying security fixes. Whenever
-temporary disconnected sites are managed locally or centrally, some changes and
-data need to be eventually synchronized back to the central site(s) with having
-its merge-conflicts resolved for the central data hub(s). While some data needs
-to be pushed from the central site(s) to the Edge, which might require
-resolving data collisions at the remote sites as well. In this paper, we aim at
-initiating discussions and position the outstanding data synchronization
+to the end users and data sources. Multiple control planes and deployments
+data synchronization is used to be a major challenge for distributed systems
+architects for years. DC-centric DevOps paradigms established for cloud
+computing should also span to the edge clouds, which expects them being
+always manageable and available at least for monitoring/alerting, scaling,
+upgrading and applying critical security fixes. Here the traditional for cloud
+computing approaches start failing in cracks. In this paper, we aim at
+initiating discussions. We position the outstanding data synchronization
 problems for OpenStack platform becoming a cloud solution number one for fog
-computing. We define the inter-cloud operational invariants based on that
-Always Available autonomy requirement. We show that a causal consistent data
-replication is the best match for the outlined operational invariants and there
-is a great opportunity for designing such a solution for Edge clouds. Finally,
-the paper brings vision of unified tooling to solve outstanding state
-synchronization problems the same way for infrastructure owners, cloud
-operators and tenants running stateful workloads hosted on OpenStack IaaS or
-OpenShift/Kubernetes PaaS deployed in Edge clouds as multi-cloud workloads
-abstraction and unification layer, to make it truly cloud-vendors agnostic and
-portable.
+computing. We define operational invariants for Edge clouds based on the
+Always Available autonomy requirement. We show that a global causal
+consistent data stores is the best match for the outlined operational
+invariants and there is a great opportunity for designing such systems for
+highly distributed fog clouds. Finally, the paper brings vision of unified
+middleware tooling to solve problems for novel use cases arised with the
+growth of edge computing. And to solve it once, either that is for
+infrastructure owners, DevOps/SRE people, or applications hosted
+on IaaS/Paas platforms, like OpenStack or OpenShift/Kubernetes.
+The ultimate goal is making such edge-native applications and cloud APIs
+truly vendors agnostic, fitting the hybrid clouds model and providing
+greater inter-operability, which is an important requirement for NFV cases.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -267,15 +267,19 @@ failure domains size of a 1. For a permanently disconnected cloudlet it may make
 more sense though to detach it from its adjacent aggregation layer and/or
 reorganize its place taken in the replication topology.
 
-\subsubsection{Queue operations to keep it always available at best
+\subsubsection{Queue operations to keep it always available at the best
 effort}
-Queued operations have to be eventually replied if/after the control/management
-plane capabilities restored, or dropped (e.g. expired) otherwise. That poses a
-lazy replication principle. If there is intermediate aggregation edge layers
-down the way to the target of the queued operations, the queue may be shared
-across each of the involved aggregation edge layers or optionally,
-queued operations may be distributed across not shared queues. That should
-reduce the associated memory and disc pressure for aggregation layers.
+Queued operations have to be eventually replayed if/after the
+control/management plane capabilities restored, or dropped (e.g. expired)
+otherwise. That poses a delayed replication principle. If there is intermediate
+aggregation edge layers down the way to the target of the queued operations,
+the queue may be shared across each of the involved aggregation edge layers or
+optionally, queued operations may be distributed across not shared queues. That
+should reduce the associated memory and disc pressure for aggregation layers.
+Note that we induced no ordering constraints for the operations replayed from
+queues, that should be defined on case-by-case basis and ideally maintain
+ordering of causal related operations only, like create a VM and snapshot that
+VM. Global unique IDs may be a good fit for maintaining such a causal ordering.
 
 \subsubsection{Provide a global view for cloudlets aliveness state}
 Global view of cloudlets needs to be periodically presented for at least one of
@@ -556,8 +560,8 @@ We defined autonomy requirements for multiple control/management planes of
 massively distributed Fog environments and imposed operational invariants off
 it. That brought us to consistency requirements for cloudlets state replication
 and associated challenges. We introduced a replication topology building
-concepts. We posed vision of key design principles, like queuing and
-lazy replication, aliveness of the control and management planes and a unified
+concepts. We posed vision of key design principles, like queuing and delayed
+replication, aliveness of the control and management planes and a unified
 approach for the middleware tooling. Possible subject solutions may be based on
 either of global/stretched causal consistent data stores, or DC-centric shims
 that operate on top of eventually or causal consistent replicated autonomous
@@ -576,12 +580,14 @@ To draw the line for where/when future work starts, we should remember
 that ``retain workloads operational as the best effort'' principle provides a
 good start for minimum viable products (MVP), like Distributed Compute Node
 (DCN) scenario. It is known to be highly wanted by telecommunication providers
-for next-gen cellular networks. A centralized control/management plane
-enables early implementations for DCN as it has no autonomy requirements. While
-post-MVP phases should evaluate the most advanced cases for IoT, AI, autonomous
-aerial drones, big data processing at the edge networks etc. That is where the
-data replication challenges to arise for multiple management and control planes
-of Edge clouds.
+for next-gen cellular networks.
+
+\newpage
+A centralized control/management plane enables early implementations for DCN as
+it has no autonomy requirements. While post-MVP phases should evaluate the most
+advanced cases for IoT, AI, autonomous aerial drones, big data processing at
+the edge networks etc. That is where the data replication challenges to arise
+for multiple management and control planes of Edge clouds.
 
 \section*{Acknowledgment}
 Thanks to all who reviewed this paper, including but not limited to:
