@@ -460,19 +460,44 @@ that gives strong fundamentals on creating application-centric programming
 methodologies that leverage invariant-repair/violation-avoidance techniques and
 rely on immutable data structures (CRDTs). Ultimately, that should help
 programmers to enforce Explicit Consistency by extending existing applications
-logic and building middleware libraries on top of the underlying causal
-consistent storage backends. That is, like Global causal consistent
-databases\cite{b6}. The work presents potential applications and databases that
-could use the causal consistency and shows possible methods to implement that
-model. It also compares serializability, eventual and causal consistency using
-a running example. There is an important conclusion that to the authors’
+logic and building middleware libraries that operate on top of the underlying
+causal consistent storage backends. That is, like Walter\cite{b11} or
+SwiftCloud\cite{b12}.
+
+Walter distributed key-value store system\cite{b11} provides a strong
+consistency guarantee within a site and causal ordering across sites. It
+introduces Parallel Snapshot Isolation (PSI) property that extends snapshot
+isolation by allowing different sites to have different commit orderings. PSI
+allows sites to diverge, which is known as sticky available causal consistency
+model. So that applications should be designed with that notion of sticky
+sessions. PSI also precludes write-write conflicts, supports update-anywhere
+for certain objects and performs asynchronous replication within a cluster that
+spans across multiple sites. The partial replication is also available for
+multi-cluster scenarios to address scalability bottlenecks. A single site
+normally operates a single instance of Walter KVS, but there is also an
+unexplored option of multiple servers per site. Such setups require switching
+the cluster(s) to distributed commits instead of the default fast commit
+protocol.
+
+SwiftCloud distributed object database\cite{b12} instead of being traditionally
+DC-centric, pushes causal consistentcy to client-side by bringing
+geo-replication all the way to the client machines. This approach looks novel
+and fitting well into Edge computing cases, if we think of the clients as
+edge-native applications running close to real clients (users).
+
+There is more of distributed/stretched Global Causal Consistent
+Databases\cite{b6}. That work presents potential applications and databases
+that could use the causal consistency and shows possible methods to implement
+that model. It also compares serializability, eventual and causal consistency
+using a running example. There is an important conclusion that to the authors’
 knowledge there is no commercial or mature systems using the causal
 consistency.
 
+Bolt-on\cite{b13} shim takes another approach and allows to leverage existing
+production-ready eventually consistent data stores virtually upgrading it to
+provide convergent causal consistency.
+
 \begin{itemize}
-  \item \textbf{Open questions}: does COPS work for multiple datacenters
-    failure events, assuming at the edge there may be a lot of small failure
-    domains? Does it cover bidirectional/two-way convergent causal+ replication?
   \item \textbf{Open questions}: what generic data replication cases can we
     break down to be always performed one-way? That simplifies implementation a
     lot: ``Although most implementations use bidirectional communication, the
@@ -484,13 +509,19 @@ consistency.
     synchronization mechanisms fully address the needs for bidirectional data
     replication? Like predictable cloud users/projects' IDs that require no
     shared replicating databases.
-  \item \textbf{Open questions}: any opensource implementations yet for causal
-    consistent databases/KVS or midleware, like that RTC/COPS/Indigo etc.
-    describes, to benefit OpenStack/Kubernetes cloud platforms for edge cases
-    that rely on multiple autonomous control planes? If there is any, chances
-    it can be integrated as a unified solution that fits all control/management
-    planes cases for the platform, cloudlets and edge-native workloads? For
-    example, consuming it as Replication-as-a-Service.
+  \item \textbf{Open questions}: are there opensource projects to benefit
+    OpenStack/Kubernetes cloud platforms for edge cases that rely on multiple
+    autonomous control planes? Either mature or in active development,
+    implementing a causal consistent database/KVS, like Walter/SwiftCloud, or
+    midleware/shims operating on top of such weakly consistent systems, like
+    RTC/COPS/Indigo/Bolt-on? For example, SwiftCloud is an opensource project
+    available under Apache 2.0 license and might be a good start for future
+    work of adopting it for OpenStack/Kubernetes and edge-native applications
+    as Replication-as-a-Service.
+  \item \textbf{Open questions}: what of the stretched/global clusters can
+    support multi-site failure events, assuming at the edge there may be a lot
+    of small failure domains? And which of those can provide two-way
+    convergent causal consistent data replication across edge sites?
 \end{itemize}
 
 STACK Reseach Group\cite{b8} provides a list of the features required to
@@ -506,11 +537,13 @@ Manager, which is opposed to hierarchical distributed topologies. It is stated
 that P2P saves maintenance costs associated with hierarchies, while the latter
 also require complex operations in case of failures. The unified IaaS Manager
 is positioned as an alternative to stretched control plane and federated
-clouds.  It emphasises on challenges of data locality, efficient cloud storage,
+clouds. It emphasises on challenges of data locality, efficient cloud storage,
 inter-operability peering agreements, autonomous lifecycle tooling and new
 edge-native cloud APIs as paramaunt requirements. Such a view-point naturally
 complements the vision of unified management plane as we introduced it for this
-paper. The edge-cloud native APIs may be also designed with the approaches that
+paper.
+
+The edge-cloud native APIs may be also designed with the approaches that
 Indigo\cite{b10} or RainbowFS\cite{b7} takes. The latter work focuses on
 Just-Right (modular) Consistency and flexible service level agreements, like
 latency requirements, enforced data locality and smart storage placement
@@ -523,12 +556,14 @@ We defined autonomy requirements for multiple control/management planes of
 massively distributed Fog environments and imposed operational invariants off
 it. That brought us to consistency requirements for cloudlets state replication
 and associated challenges. We introduced a replication topology building
-concepts. Finally, we posed vision of key design principles, like queuing and
+concepts. We posed vision of key design principles, like queuing and
 lazy replication, aliveness of the control and management planes and a unified
-approach for the subject tooling. Possible solutions may be based on either
-shared causal consistent databases, file systems, or client libraries that
-replicate not shared local data low-level. Or as well client libraries that
-replicate operations at an API high-level.
+approach for the middleware tooling. Possible subject solutions may be based on
+either of global/stretched causal consistent data stores, or DC-centric shims
+that operate on top of eventually or causal consistent replicated autonomous
+data stores. Or client-side middleware placed at the edge. That is all to
+synchronize data low-level. Alternatively, that may be middleware that
+replicates operations at an API-to-API high-level.
 
 We want to position the unification principle as the most important thing and
 the greatest opportunity for developers to do it ``the right way'', which is to
@@ -537,15 +572,16 @@ replication tooling might benefit as a service, i.e. cloud tenants,
 infrastructure owners and operators. That also applies to any fog-based system
 and is not limited to OpenStack or Kubernetes ecosystems.
 
-Finally, we have to admit that because of outstanding future research work and
-potentially huge amount of changes for IaaS/PaaS cloud components required to
-implement or adopt either of the aforementioned options for multiple
-control/management planes state replication, it perhaps should be a next
-iteration after a minimum viable product (MVP) done as a single distributed
-control plane separated from the management plane. That enables early
-implementations for a very restricted subsets of operational invariants without
-autonomy supported, but ``retain workloads operational as the best
-effort''.
+To draw the line for where/when future work starts, we should remember
+that ``retain workloads operational as the best effort'' principle provides a
+good start for minimum viable products (MVP), like Distributed Compute Node
+(DCN) scenario. It is known to be highly wanted by telecommunication providers
+for next-gen cellular networks. A centralized control/management plane
+enables early implementations for DCN as it has no autonomy requirements. While
+post-MVP phases should evaluate the most advanced cases for IoT, AI, autonomous
+aerial drones, big data processing at the edge networks etc. That is where the
+data replication challenges to arise for multiple management and control planes
+of Edge clouds.
 
 \section*{Acknowledgment}
 Thanks to all who reviewed this paper, including but not limited to:
@@ -564,5 +600,8 @@ OpenStack Summit at Berlin, 2018.
 \bibitem{b8} R. A. Cherrueau, A. Lebre, D. Pertin, F. Wuhib, J. M. Soares, ``Edge Computing Resource Management System: a Critical Building Block! Initiating the debate via OpenStack'', USENIX HotEdge’18 Workshop, 2018.
 \bibitem{b9} A. Lebre, J. Pastor, A. Simonet, F. Desprez, ``Revising OpenStack to Operate Fog/Edge Computing Infrastructures'', IEEE International Conference on Cloud Engineering (IC2E), 2017.
 \bibitem{b10} V. Balegas, N. Preguiça, R. Rodrigues, S. Duarte, C. Ferreira, M. Najafzadeh, M. Shapiro, ``Putting Consistency back into Eventual Consistency'', Euro. Conf. on Computing Systems (EuroSys), Bordeaux, France, 2015.
+\bibitem{b11} Y. Sovran, R. Power, M. Aguilera, and J. Li, ``Transactional Storage for Geo-replicated Systems'', SOSP'11, page 385-400. New York, USA, 2011. ACM.
+\bibitem{b12} M. Zawirski, A. Bieniusa, V. Balegas, S. Duarte, C. Baquero, M. Shapiro, and N. Preguica, ``SwiftCloud: Fault-Tolerant Geo-Replication Integrated all the Way to the Client Machine'', Research Report RR-8347, INRIA, Oct. 2013.
+\bibitem{b13} P. Bailis, A. Ghodsi, J. M. Hellerstein, and I. Stoica, ``Bolt-on Causal Consistency'', SIGMOD'13, pages 761–772, New York, USA, 2013. ACM.
 \end{thebibliography}
 \end{document}
