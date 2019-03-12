@@ -47,7 +47,7 @@ designing such systems for edge cases as a unified solution applicable for
 infrastructure owners, DevOps/SRE people and MEC applications hosted on
 IaaS/Paas platforms, like OpenStack and Kubernetes. Finally, we bring vision
 of such edge-native applications and cloud APIs to be designed as vendors
-agnostic and provide inter-operability over multi-vendored hybrid Edge clouds.
+agnostic and provide interoperability over hybrid Edge clouds.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -68,10 +68,10 @@ Whereby we can have state of applications or control planes synchronized
 eventually and partially, which requires no strong consistency and no global
 view for the most of the cases. Think of autonomous unmanned drones controlled
 via compact mobile datacenters that cannot always maintain its upstream links
-up. Or 5G cellular networks, where realtime speech/video recognition or
+up. Or 5G cellular networks, where real-time speech/video recognition or
 streaming/gaming applications go far beyond the computing powers of tiny
 devices running it, exceed communication latency of the centralized data
-processing in a traditional cloud and require smooth handovers for user
+processing in a traditional cloud and require a smooth handover for user
 mobility cases. Such autonomy and data locality requirements impose multiple
 control and configuration management planes to maintain constant availability
 for operations and local manageability of systems/applications. Those must be
@@ -79,7 +79,7 @@ available, while being offline, or keep operating over low-latency channels,
 while executing a handover between base radio network stations, which require
 state transfers and resolving of possible conflicts caused by concurrent
 updates or applying locally cached operations after a network drop out ends. We
-aim at initating debates on these challenges through numerous communities,
+aim at initiating debates on these challenges through numerous communities,
 foundations and project groups dedicated to building solutions for MEC and
 other edge computing cases that involve multiple control planes and multi-site
 or multi-cloud operations.
@@ -471,7 +471,7 @@ the cluster(s) to distributed commits instead of the default fast commit
 protocol.
 
 SwiftCloud distributed object database\cite{b12} instead of being traditionally
-DC-centric, pushes causal consistentcy to client-side by bringing
+DC-centric, pushes causal consistency to client-side by bringing
 geo-replication all the way to the client machines. This approach looks novel
 and fitting well into Edge computing cases, if we think of the clients as
 edge-native applications running close to real clients (users).
@@ -500,12 +500,12 @@ provide convergent causal consistency.
     synchronization mechanisms fully address the needs for bidirectional data
     replication? Like predictable cloud users/projects' IDs that require no
     shared replicating databases.
-  \item \textbf{Open questions}: are there opensource projects to benefit
+  \item \textbf{Open questions}: are there open-source projects to benefit
     OpenStack/Kubernetes cloud platforms for edge cases that rely on multiple
     autonomous control planes? Either mature or in active development,
     implementing a causal consistent database/KVS, like Walter/SwiftCloud, or
     midleware/shims operating on top of such weakly consistent systems, like
-    RTC/COPS/Indigo/Bolt-on? For example, SwiftCloud is an opensource project
+    RTC/COPS/Indigo/Bolt-on? For example, SwiftCloud is an open-source project
     available under Apache 2.0 license and might be a good start for future
     work of adopting it for OpenStack/Kubernetes and edge-native applications
     as Replication-as-a-Service.
@@ -515,48 +515,48 @@ provide convergent causal consistency.
     convergent causal consistent data replication across edge sites?
 \end{itemize}
 
-STACK Reseach Group\cite{b8} provides a list of the features required to
+STACK Research Group\cite{b8} provides a list of the features required to
 operate and use edge computing resources. The listed requirements are
 complementary to this work and represent the operational invariants approached
 from OpenStack developers and operators (DevOps) angle, the view point that
-also covers inter-operability between multiple operators. The latter is an
-important requirement for hybrid clouds and Network Functions Virtualization
+also covers interoperability between multiple operators. The latter is an
+important requirement for hybrid clouds and Network Function Virtualization
 (NFV) Edge cases, like Virtual Customer Premises Equipment (vCPE).
 
-Speaking more of Telcos and dynamic Mobile Edge Computing environments,
-there is also high demand for modern lightweight latency-tolerant data
-replication and live migration solutions performing well over WANs and not being DC-centric. The related work\cite{b15}
-focuses on stateful migration, which involves moving running states of MEC
-applications in containers based environment without storage area networks
-(SANs) and shared storage constraints. The designed method works over WAN,
-which is envisioned to be the way that MECs are interconnected, and is a
-generic mechanism that applies for different types of containers and VMs. Fast
-and lightweight data replication techniques to cope with user mobility
-considered in another related work\cite{b16} what covers statless cases and may
-be also extended to stateful MEC applications (which is dependent on the
-underlying containers orchestration engine (COE) capabilities). It is notable
-that in these two works container‐based virtualization is considered one of the
-most promising solutions for MEC environments. Virtualized 5G in Evolved Packet
-Core (vEPC) Architectures\cite{b14} serves another good example of high demand
-emerging from the world of Telcos. The work describes a state sharing mechanism
-across different datacenters that leverages Edge Synchronization Protocol(ESP)
-and Abstract Syntax Notation.1 (ASN.1). There is no mentions of causal
-consistency models at all but it really reads between the lines as a such.
-That is exactly causal consistency provides the best choices for picking which
-state portions should be shared/replicated, to which cloudlets and under which
-conditions. With causal ordering may be bound here onto operations applied
-over distict subscribers/sessions and any state associated with it. The unified
-approach plays the best here and might bridge those seemingly orthogonal Telco
-and IaaS/PaaS worlds into the plain of common middleware.
+Speaking more of Telcos and dynamic Mobile Edge Computing environments, there
+is also high demand for modern lightweight latency-tolerant data replication
+and live migration solutions performing well over WANs and not being
+DC-centric. The related work\cite{b15} focuses on stateful migration, which
+involves moving running states of MEC applications in containers based
+environment without storage area networks (SANs) and shared storage
+constraints. The designed method works over WAN, which is envisioned to be the
+way that MECs are interconnected, and is a generic mechanism that applies for
+different types of containers and VMs. Fast and lightweight data replication
+techniques to cope with user mobility considered in another related
+work\cite{b16} what covers statless cases and may be also extended to stateful
+MEC applications (which is dependent on the underlying containers orchestration
+engine (COE) capabilities). It is notable that in these two works
+container‐based virtualization is considered one of the most promising
+solutions for MEC environments. Virtualized 5G in Evolved Packet Core (vEPC)
+Architectures\cite{b14} serves another good example of high demand emerging
+from the world of Telcos. The work describes a state sharing mechanism across
+different datacenters that leverages Edge Synchronization Protocol(ESP) and
+Abstract Syntax Notation.1 (ASN.1). There is no mentions of causal consistency
+models but it reads between the lines as a such.  Causal consistency provides
+the best choices for picking which state portions should be shared/replicated,
+to which cloudlets and under which conditions. And operations targeted at
+mobile subscribers may be a subject for causal ordering constraints. The
+unified approach plays the best here and brings Telco and IaaS/PaaS worlds into
+the plane of common middleware.
 
 A. Lebre et al.\cite{b9} bring vision of a Peer-to-Peer (P2P) OpenStack IaaS
 Manager, which is opposed to hierarchical distributed topologies. It is stated
 that P2P saves maintenance costs associated with hierarchies, while the latter
 also require complex operations in case of failures. The unified IaaS Manager
 is positioned as an alternative to stretched control plane and federated
-clouds. It emphasises on challenges of data locality, efficient cloud storage,
-inter-operability peering agreements, autonomous lifecycle tooling and new
-edge-native cloud APIs as paramaunt requirements. Such a view-point naturally
+clouds. It emphasizes on challenges of data locality, efficient cloud storage,
+interoperability peering agreements, autonomous lifecycle tooling and new
+edge-native cloud APIs as paramount requirements. Such a view-point naturally
 complements the vision of unified management plane as we introduced it for this
 paper.
 
