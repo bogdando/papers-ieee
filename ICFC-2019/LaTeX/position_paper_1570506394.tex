@@ -95,6 +95,10 @@ represent either the most recent state of a deployment, or arbitrary data
 chunks/operations required to alter that state. When there is unresolved data
 merging conflicts or queued operations pending for future execution, the most
 recent state becomes the \textit{best known} one.
+
+\textbf{Cloud Data}: similarly to deployment data, represents the most recent
+or the best known internal and publicly visible state of cloudlets, like cloud
+users or virtual routers. Cloud data also includes logs, performance and usage
 \begin{figure}[htbp]
 \caption{Example Replication Topology}.
 \begin{forest}
@@ -125,9 +129,6 @@ recent state becomes the \textit{best known} one.
 \end{forest}
 \end{figure}
 
-\textbf{Cloud Data}: similarly to deployment data, represents the most recent
-or the best known internal and publicly visible state of cloudlets, like cloud
-users or virtual routers. Cloud data also includes logs, performance and usage
 statistics, state of message queues and the contents of databases. It may as
 well represent either data chunks or operations targeted for some state
 $\mathrm{S}$ transitioning into a new state $\mathrm{S'}$.
