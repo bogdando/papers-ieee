@@ -32,27 +32,22 @@ Challenges\\
 
 \begin{abstract}
 Fog computing is an emerging paradigm aiming at bringing cloud functions closer
-to the end users and data sources. Multiple control planes and deployments
-data synchronization is used to be a major challenge for distributed systems
-architects for years. DC-centric DevOps paradigms established for cloud
-computing should also span to the edge clouds, which expects them being
-always manageable and available at least for monitoring/alerting, scaling,
-upgrading and applying critical security fixes. Here the traditional for cloud
-computing approaches start failing in cracks. In this paper, we aim at
-initiating discussions. We position the outstanding data synchronization
-problems for OpenStack platform becoming a cloud solution number one for fog
-computing. We define operational invariants for Edge clouds based on the
-Always Available autonomy requirement. We show that a global causal
-consistent data stores is the best match for the outlined operational
-invariants and there is a great opportunity for designing such systems for
-highly distributed fog clouds. Finally, the paper brings vision of unified
-middleware tooling to solve problems for novel use cases arised with the
-growth of edge computing. And to solve it once, either that is for
-infrastructure owners, DevOps/SRE people, or applications hosted
-on IaaS/Paas platforms, like OpenStack or OpenShift/Kubernetes.
-The ultimate goal is making such edge-native applications and cloud APIs
-truly vendors agnostic, fitting the hybrid clouds model and providing
-greater inter-operability, which is an important requirement for NFV cases.
+to the end users and data sources. Traditional DC-centric DevOps paradigms
+established for cloud computing should also span to Edge clouds, which
+expects them being always manageable and available for monitoring/alerting,
+scaling, upgrading and applying security fixes. That poses a challenge for edge
+as classic methods do not apply here. Moreover, data synchronization became a
+common challenge for OpenStack/Kubernetes platforms hosting Mobile Edge
+Computing environments. In this paper, we aim at initiating discussions around
+that. We define operational invariants for Edge clouds based on the Always
+Available autonomy requirement and related state-of-art work. We evaluate
+global/replicated causal consistent data stores and middleware as possible
+match for meeting those invariants. We point out a great opportunity for
+designing such systems for edge cases as a unified solution applicable for
+infrastructure owners, DevOps/SRE people and MEC applications hosted on
+IaaS/Paas platforms, like OpenStack and Kubernetes. Finally, we bring vision
+of such edge-native applications and cloud APIs to be designed as vendors
+agnostic and provide inter-operability over multi-vendored hybrid Edge clouds.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -61,42 +56,33 @@ availability, Design
 \end{IEEEkeywords}
 
 \section{Introduction}
-OpenStack is an Infrastructure-as-a-Service platform number one for private
-cloud computing, and it becomes being so for fog computing as well.
-Hybridization and multi-cloud trends for private clouds interconnected with
-public clouds and Platform-as-a-Service (PaaS) solutions, like
-OpenShift/Kubernetes, allow the containerization of micro-services oriented
-workloads to emerge in a highly portable, self-contained and the hosting
-cloud-agnostic way. Giving it massively distributed scale of fog computing and
-bringing the data it operates closer to end users, opens great opportunities
-for Internet of Things (IoT) and 5G telecommunication technologies,
-which first of all requires low-latency and highly responsive interfaces always
-available for end users.
-
-Speaking of an always available, back to the system administration realities,
-the Edge clouds control and management plane capabilities in such a massively
-distributed world shall not fall behind as well. In Fog environments,
-expectations for those capabilities are very different to the traditional cloud
-environments. There you have a highly available control plane, and a management
-layer for your cloud. From the geographical standpoint, it is also a mostly
-still layout. Control/management nodes are hosted in well suited datacenters
-and communicate over low-latency reliable connections, where network partitions
-are considered as disasters. While in Fog clouds, being offline is rather a
-normal state of things, where state can be synchronized eventually. Think of
-autonomous unmanned drones controlled via compact mobile datacenters that
-cannot always maintain its upstream links up. In 5G networks, smart mobile
-applications, like speech or video recognition, go far beyond the computing
-powers of tiny devices running it. So data have to travel with its consumers to
-be always at hand and accessed via a low-latency connection from a nearest
-compact datacenter. It has to be compact as maintaining thousands of classic
-datacenters won't fit neither the most generous business model nor if limited
-space/weight et al requirements. And such autonomy imposes multiple control and
-configuration management planes to maintain local operations and manageability
-of systems while being offline. In turn, that brings outstanding problems of
-data replication and consistency. We aim at initating debates through numerous
-communities, foundations and project groups dedicated to building solutions
-for Edge computing cases that involve multiple control planes and multi-site
-operations.
+Hybrid and multi-cloud environments is inevitable future of cloud computing.
+Interconnected private and public clouds, optionally hosting
+Platform-as-a-Service (PaaS) solutions on top, like OpenShift/Kubernetes, with
+its workloads pushed closer to end users, unlock great potential for Mobile
+Edge Computing (MEC) and massively distributed scenarios. In fog environments,
+expectations for management, control and operational capabilities are pretty
+same as to the traditional cloud environments, while DC-centric approaches do
+not work over wide area networks (WANs) and multiple autonomous control planes.
+Whereby we can have state of applications or control planes synchronized
+eventually and partially, which requires no strong consistency and no global
+view for the most of the cases. Think of autonomous unmanned drones controlled
+via compact mobile datacenters that cannot always maintain its upstream links
+up. Or 5G cellular networks, where realtime speech/video recognition or
+streaming/gaming applications go far beyond the computing powers of tiny
+devices running it, exceed communication latency of the centralized data
+processing in a traditional cloud and require smooth handovers for user
+mobility cases. Such autonomy and data locality requirements impose multiple
+control and configuration management planes to maintain constant availability
+for operations and local manageability of systems/applications. Those must be
+available, while being offline, or keep operating over low-latency channels,
+while executing a handover between base radio network stations, which require
+state transfers and resolving of possible conflicts caused by concurrent
+updates or applying locally cached operations after a network drop out ends. We
+aim at initating debates on these challenges through numerous communities,
+foundations and project groups dedicated to building solutions for MEC and
+other edge computing cases that involve multiple control planes and multi-site
+or multi-cloud operations.
 
 \section{Background Concepts}
 Aside of the established terms\cite{b3}, we define a few more for the data
@@ -536,10 +522,9 @@ also covers inter-operability between multiple operators. The latter is an
 important requirement for hybrid clouds and Network Functions Virtualization
 (NFV) Edge cases, like Virtual Customer Premises Equipment (vCPE).
 
-Speaking more of Telcos and dynamic Mobile Edge Computing (MEC) environments,
+Speaking more of Telcos and dynamic Mobile Edge Computing environments,
 there is also high demand for modern lightweight latency-tolerant data
-replication and live migration solutions performing well over backbone wide
-area networks (WANs) and not being DC-centric. The related work\cite{b15}
+replication and live migration solutions performing well over WANs and not being DC-centric. The related work\cite{b15}
 focuses on stateful migration, which involves moving running states of MEC
 applications in containers based environment without storage area networks
 (SANs) and shared storage constraints. The designed method works over WAN,
@@ -558,7 +543,7 @@ and Abstract Syntax Notation.1 (ASN.1). There is no mentions of causal
 consistency models at all but it really reads between the lines as a such.
 That is exactly causal consistency provides the best choices for picking which
 state portions should be shared/replicated, to which cloudlets and under which
-conditions.  With causal ordering may be bound here onto operations applied
+conditions. With causal ordering may be bound here onto operations applied
 over distict subscribers/sessions and any state associated with it. The unified
 approach plays the best here and might bridge those seemingly orthogonal Telco
 and IaaS/PaaS worlds into the plain of common middleware.
