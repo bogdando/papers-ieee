@@ -523,31 +523,30 @@ also covers interoperability between multiple operators. The latter is an
 important requirement for hybrid clouds and Network Function Virtualization
 (NFV) Edge cases, like Virtual Customer Premises Equipment (vCPE).
 
-Speaking more of Telcos and dynamic Mobile Edge Computing environments, there
-is also high demand for modern lightweight latency-tolerant data replication
-and live migration solutions performing well over WANs and not being
-DC-centric. The related work\cite{b15} focuses on stateful migration, which
-involves moving running states of MEC applications in containers based
-environment without storage area networks (SANs) and shared storage
-constraints. The designed method works over WAN, which is envisioned to be the
-way that MECs are interconnected, and is a generic mechanism that applies for
-different types of containers and VMs. Fast and lightweight data replication
-techniques to cope with user mobility considered in another related
-work\cite{b16} what covers statless cases and may be also extended to stateful
-MEC applications (which is dependent on the underlying containers orchestration
-engine (COE) capabilities). It is notable that in these two works
-container‐based virtualization is considered one of the most promising
-solutions for MEC environments. Virtualized 5G in Evolved Packet Core (vEPC)
-Architectures\cite{b14} serves another good example of high demand emerging
+In Mobile Edge Computing environments, there is also high demand for novel
+lightweight data replication and applications live migration solutions. Those
+must perform well over WAN and not being DC-centric. Proactive data replication
+techniques to cope with user mobility considered in the related work\cite{b14}.
+It poses challenges of efficient scheduling of data replicas over the edge
+nodes. According to ETSI reference architecture, MEC Orchestrators are
+responsible for solving these problems via user mobility prediction, while
+virtualization infrastructure management (VIM) should implement the proposed
+procedures of proactive migration. It is notable that container‐based VIMs are
+considered the most promising solutions for MEC environments, mostly due to
+reduced footprint of containers. Virtualized 5G in Evolved Packet Core (vEPC)
+Architectures\cite{b15} serves another good example of high demand emerging
 from the world of Telcos. The work describes a state sharing mechanism across
 different datacenters that leverages Edge Synchronization Protocol(ESP) and
-Abstract Syntax Notation.1 (ASN.1). There is no mentions of causal consistency
-models but it reads between the lines as a such.  Causal consistency provides
-the best choices for picking which state portions should be shared/replicated,
-to which cloudlets and under which conditions. And operations targeted at
-mobile subscribers may be a subject for causal ordering constraints. The
-unified approach plays the best here and brings Telco and IaaS/PaaS worlds into
-the plane of common middleware.
+Abstract Syntax Notation.1 (ASN.1). None of these two works mention
+causal consistency but it reads between the lines as the such, that answers the
+questions, like which state portions should be replicated, to which cloudlets
+and under which conditions. E.g. predicted users' trajectories or operations
+involving particular mobile subscribers may help to establish causal relations
+and impact associated replication decisions at the stateful applications level.
+StatelessNF\cite{b16} rearchitects NFV applications to maintain its internal
+state in a low-latency storage tier of underneath VIM IaaS/PaaS platforms. That
+delegates the data replication services to VIMs' middleware or its global
+storage backends built-in replication capabilities.
 
 A. Lebre et al.\cite{b9} bring vision of a Peer-to-Peer (P2P) OpenStack IaaS
 Manager, which is opposed to hierarchical distributed topologies. It is stated
@@ -589,7 +588,8 @@ replication tooling might benefit as a service, i.e. infrastructure owners,
 DevOps, and tenants workloads, like those next-gen highly dynamic Telco MEC
 environments we have had a quick glimpse onto. That unification principle also
 applies to any fog-based system and is not limited to OpenStack or Kubernetes
-ecosystems.
+ecosystems. Finally, it is an opportunity for Telco and IaaS/PaaS worlds to
+share common solutions across MEC Orchestrators, VIMs etc.
 
 To draw the line for where/when future work starts, we should remember
 that ``retain workloads operational as the best effort'' principle provides a
@@ -625,8 +625,8 @@ OpenStack Summit at Berlin, 2018.
 \bibitem{b11} Y. Sovran, R. Power, M. Aguilera, and J. Li, ``Transactional Storage for Geo-replicated Systems'', SOSP'11, page 385-400. New York, USA, 2011. ACM.
 \bibitem{b12} M. Zawirski, A. Bieniusa, V. Balegas, S. Duarte, C. Baquero, M. Shapiro, and N. Preguica, ``SwiftCloud: Fault-Tolerant Geo-Replication Integrated all the Way to the Client Machine'', Research Report RR-8347, INRIA, Oct. 2013.
 \bibitem{b13} P. Bailis, A. Ghodsi, J. M. Hellerstein, and I. Stoica, ``Bolt-on Causal Consistency'', SIGMOD'13, pages 761–772, New York, USA, 2013. ACM.
-\bibitem{b14} E. Cau, M. Corici, P. Bellavista, L. Foschini, G. Carella, A. Edmonds, and T. Bohnert, ``Efficient Exploitation of Mobile Edge Computing for Virtualized 5G in EPC Architectures'', MobileCloud, page 100-109. IEEE Computer Society, 2016.
-\bibitem{b15} A. Machen, S. Wang, K. K. Leung, B. J. Ko, and T. Salonidis, ``Live service migration in mobile edge clouds'', IEEE Wireless Communications, vol. PP, no. 99, pp. 2–9, 2017.
-\bibitem{b16} I. Farris, T. Taleb, H. Flinck, A. Iera, ``Providing ultra‐short latency to user‐centric 5G applications at the mobile network edge'', Transactions on Emerging Telecommunications Technologies, Vol. 29, No. 4, e3169, 04.2018.
+\bibitem{b14} I. Farris, T. Taleb, H. Flinck, A. Iera, ``Providing ultra‐short latency to user‐centric 5G applications at the mobile network edge'', Transactions on Emerging Telecommunications Technologies, Vol. 29, No. 4, e3169, 2018.
+\bibitem{b15} E. Cau, M. Corici, P. Bellavista, L. Foschini, G. Carella, A. Edmonds, and T. Bohnert, ``Efficient Exploitation of Mobile Edge Computing for Virtualized 5G in EPC Architectures'', MobileCloud, page 100-109. IEEE Computer Society, 2016.
+\bibitem{b16} M. Kablan, A. Alsudais, E. Keller, Franck Le,``Stateless Network Functions: Breaking the Tight Coupling of State and Processing'', NSDI, 97-112, 2017. 44, 2017.
 \end{thebibliography}
 \end{document}
