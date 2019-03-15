@@ -33,21 +33,23 @@ Challenges\\
 \begin{abstract}
 Fog computing is an emerging paradigm aiming at bringing cloud functions closer
 to the end users and data sources. Traditional DC-centric DevOps paradigms
-established for cloud computing should also span to Edge clouds, which
-expects them being always manageable and available for monitoring/alerting,
-scaling, upgrading and applying security fixes. That poses a challenge for edge
-as classic methods do not apply here. Moreover, data synchronization became a
-common challenge for OpenStack/Kubernetes platforms hosting Mobile Edge
-Computing environments. In this paper, we aim at initiating discussions around
-that. We define operational invariants for Edge clouds based on the Always
-Available autonomy requirement and related state-of-art work. We evaluate
-global/replicated causal consistent data stores and middleware as possible
-match for meeting those invariants. We point out a great opportunity for
-designing such systems for edge cases as a unified solution applicable for
-infrastructure owners, DevOps/SRE people and MEC applications hosted on
-IaaS/Paas platforms, like OpenStack and Kubernetes. Finally, we bring vision
-of such edge-native applications and cloud APIs to be designed as vendors
-agnostic and provide interoperability over hybrid Edge clouds.
+established for cloud computing should also span to Edge clouds, which expects
+them being always manageable and available for monitoring/alerting, scaling,
+upgrading and applying security fixes. That is a challenge as classic methods
+do not fit edge cases. Data synchronization is also a common issue for
+IaaS/PaaS platforms and Mobile Edge Computing environments hosted there. In
+this paper, we aim at initiating discussions around that challenge. We define
+operational invariants for Edge clouds based on the Always Available autonomy
+requirement and related state-of-art work. We evaluate global/replicated causal
+consistent data stores and middleware as possible match for meeting those
+invariants. We point out a great opportunity for designing causal consistent
+systems for edge cases as a common solution for cloud infrastructure owners,
+DevOps/SRE and MEC applications. Finally, we bring vision of
+Replication-as-a-Service, unified design approach to benefit applications, like
+NFV/StatelessNF, and cloud middleware/APIs. Having RaaS implemented as
+vendors-agnostic commodity software/storage systems that provide
+interoperability over hybrid clouds and multiple service providers is the
+ultimate mission for future work.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -64,25 +66,20 @@ Edge Computing (MEC) and massively distributed scenarios. In fog environments,
 expectations for management, control and operational capabilities are pretty
 same as to the traditional cloud environments, while DC-centric approaches do
 not work over wide area networks (WANs) and multiple autonomous control planes.
-Whereby we can have state of applications or control planes synchronized
-eventually and partially, which requires no strong consistency and no global
-view for the most of the cases. Think of autonomous unmanned drones controlled
-via compact mobile datacenters that cannot always maintain its upstream links
-up. Or 5G cellular networks, where real-time speech/video recognition or
-streaming/gaming applications go far beyond the computing powers of tiny
-devices running it, exceed communication latency of the centralized data
-processing in a traditional cloud and require a smooth handover for user
-mobility cases. Such autonomy and data locality requirements impose multiple
-control and configuration management planes to maintain constant availability
-for operations and local manageability of systems/applications. Those must be
-available, while being offline, or keep operating over low-latency channels,
-while executing a handover between base radio network stations, which require
-state transfers and resolving of possible conflicts caused by concurrent
-updates or applying locally cached operations after a network drop out ends. We
-aim at initiating debates on these challenges through numerous communities,
-foundations and project groups dedicated to building solutions for MEC and
-other edge computing cases that involve multiple control planes and multi-site
-or multi-cloud operations.
+Whereby we can have state of applications or control/management planes
+synchronized eventually and partially, which requires no strong consistency and
+no global view for the most of the cases and most of the time. That imposes
+requirements for specific distributed/replicated data stores and/or middleware
+to maintain constant availability for centralized control/management planes
+without violating the requirement of local manageability of
+systems/applications. These must be available, while being offline or executing
+a handover between base radio network stations, and recover its state fast upon
+a crash. All that requires smart, WAN-optimized state transfers and resolving
+of possible conflicts caused by concurrent updates or applying locally cached
+operations after a network drop out ends. We aim at initiating debates on these
+challenges through numerous communities, foundations and project groups
+dedicated to building solutions for MEC, NFV and other edge computing cases
+that involve multiple control planes and multi-site or multi-cloud operations.
 
 \section{Background Concepts}
 Aside of the established terms\cite{b3}, we define a few more for the data
@@ -99,6 +96,8 @@ recent state becomes the \textit{best known} one.
 \textbf{Cloud Data}: similarly to deployment data, represents the most recent
 or the best known internal and publicly visible state of cloudlets, like cloud
 users or virtual routers. Cloud data also includes logs, performance and usage
+statistics, state of message queues and the contents of databases. It may as
+well represent either data chunks or operations targeted for some state
 \begin{figure}[htbp]
 \caption{Example Replication Topology}.
 \begin{forest}
@@ -129,8 +128,6 @@ users or virtual routers. Cloud data also includes logs, performance and usage
 \end{forest}
 \end{figure}
 
-statistics, state of message queues and the contents of databases. It may as
-well represent either data chunks or operations targeted for some state
 $\mathrm{S}$ transitioning into a new state $\mathrm{S'}$.
 
 \textbf{Control Plane}: corresponds to any operations performed via cloudlets
@@ -418,7 +415,7 @@ invariants as we defined those.
 The vision of the unified architecture for future state replication tooling
 imposes it should be solving the multiple control/management planes data
 synchronization problems for IaaS, PaaS and end users consuming it as
-Replication-as-a-Service. Although generic version control systems, like Git,
+Replication-as-a-Service (RaaS). Although generic version control systems, like Git,
 might fit all cases for deployment data replicating and conflicts resolving,
 that would break the unified design approach for cloud data/state replication.
 
@@ -434,11 +431,8 @@ using different solutions for its local data storages as far as the state
 replication tooling may support such backends.
 
 Additionally, client libraries may replicate not only data but operations at an
-API level\footnote{For OpenStack Nova, there had been an example for such an
-API level replication, that is a Cells V1 protocol. But it had been deprecated
-as real cells v1 deployments required constant human care and feeding
-operationally} as well, i.e. resolve conflicting operations on-fly, then apply
-the resulting causal related operations for its original targets, effectively
+API level as well, i.e. resolve conflicting operations on-fly, then apply the
+resulting causal related operations for its original targets, effectively
 replicating changes at an API level. Operations queued by the
 control/management planes, including those targeted for offline cloudlets, may
 be also processed that way.
@@ -508,7 +502,7 @@ provide convergent causal consistency.
     RTC/COPS/Indigo/Bolt-on? For example, SwiftCloud is an open-source project
     available under Apache 2.0 license and might be a good start for future
     work of adopting it for OpenStack/Kubernetes and edge-native applications
-    as Replication-as-a-Service.
+    as RaaS.
   \item \textbf{Open questions}: what of the stretched/global clusters can
     support multi-site failure events, assuming at the edge there may be a lot
     of small failure domains? And which of those can provide two-way
@@ -542,11 +536,12 @@ causal consistency but it reads between the lines as the such, that answers the
 questions, like which state portions should be replicated, to which cloudlets
 and under which conditions. E.g. predicted users' trajectories or operations
 involving particular mobile subscribers may help to establish causal relations
-and impact associated replication decisions at the stateful applications level.
-StatelessNF\cite{b16} rearchitects NFV applications to maintain its internal
-state in a low-latency storage tier of underneath VIM IaaS/PaaS platforms. That
-delegates the data replication services to VIMs' middleware or its global
-storage backends built-in replication capabilities.
+and produce ultimate replication decisions at the applications level.
+StatelessNF\cite{b16} rearchitects NFV applications to decouple its internal
+dynamic state, like connections tracked by firewalls, into a low-latency
+storage tier of underneath VIM or unified RaaS. After that point, the data
+replication tasks become no different to other tasks required by the operational
+invariants of multiple control/management planes.
 
 A. Lebre et al.\cite{b9} bring vision of a Peer-to-Peer (P2P) OpenStack IaaS
 Manager, which is opposed to hierarchical distributed topologies. It is stated
@@ -581,15 +576,16 @@ data stores. Or client-side middleware placed at the edge. That is all to
 synchronize data low-level. Alternatively, that may be middleware that
 replicates operations at an API-to-API high-level.
 
-We want to position the unification principle as the most important thing and
-the greatest opportunity for developers to do it ``the right way'', which is to
-bring the best of two IaaS and PaaS worlds for end users whom such data
-replication tooling might benefit as a service, i.e. infrastructure owners,
-DevOps, and tenants workloads, like those next-gen highly dynamic Telco MEC
-environments we have had a quick glimpse onto. That unification principle also
-applies to any fog-based system and is not limited to OpenStack or Kubernetes
-ecosystems. Finally, it is an opportunity for Telco and IaaS/PaaS worlds to
-share common solutions across MEC Orchestrators, VIMs etc.
+We want to emphasize on the unification principle as the great opportunity for
+developers to bring the best of IaaS and PaaS worlds for end users whom such
+data replication tooling might benefit as a service, i.e. DevOps and tenants
+workloads, like MEC environments and NFV. It is also an opportunity for Telco
+side to leverage the commodity replication services of infrastructure layers
+for the hosted virtual network functions (VNFs). And StalessNF benefits from
+such common RaaS solutions the most. The unification principle also applies to
+any fog-based system and is not limited to OpenStack, Kubernetes or NFV
+ecosystems. We only focus on those as a good starting point for the future
+work.
 
 To draw the line for where/when future work starts, we should remember
 that ``retain workloads operational as the best effort'' principle provides a
