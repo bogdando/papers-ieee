@@ -449,60 +449,51 @@ logic and building middleware libraries that operate on top of the underlying
 causal consistent storage backends. That is, like Walter\cite{b11} or
 SwiftCloud\cite{b12}.
 
-Walter distributed key-value store system\cite{b11} provides a strong
-consistency guarantee within a site and causal ordering across sites. It
-introduces Parallel Snapshot Isolation (PSI) property that extends snapshot
-isolation by allowing different sites to have different commit orderings. PSI
-allows sites to diverge, which is known as sticky available causal consistency
-model. So that applications should be designed with that notion of sticky
-sessions. PSI also precludes write-write conflicts, supports update-anywhere
-for certain objects and performs asynchronous replication within a cluster that
-spans across multiple sites. The partial replication is also available for
-multi-cluster scenarios to address scalability bottlenecks. A single site
-normally operates a single instance of Walter KVS, but there is also an
-unexplored option of multiple servers per site. Such setups require switching
-the cluster(s) to distributed commits instead of the default fast commit
-protocol.
+Walter\cite{b11} KVS uses a set-like CRDTs. It provides a strong consistency
+guarantee within a site and causal ordering across sites. It introduces
+Parallel Snapshot Isolation (PSI) property that extends snapshot isolation by
+allowing different sites to diverge with different commit orderings. This is
+also known as sticky available causal consistency model, where applications
+should avoid changing its connection endpoints and maintain sticky sessions.
+Walter performs asynchronous replication across multiple sites and supports
+partial replication for multi-cluster scenarios to address scalability
+bottlenecks.
 
-SwiftCloud distributed object database\cite{b12} instead of being traditionally
-DC-centric, pushes causal consistency to client-side by bringing
-geo-replication all the way to the client machines. This approach looks novel
-and fitting well into Edge computing cases, if we think of the clients as
-edge-native applications running close to real clients (users).
+SwiftCloud distributed object database\cite{b12} brings geo-replication to the
+client machines instead. It supports interactive transactions that span
+multiple CRDT types. To its authors' knowledge, asynchronous replication
+systems ensure fault-tolerant causal consistency only within the boundaries of
+the DC, while SwiftCloud guarantees convergent causal consistency all the way
+to resource-poor end clients. SwiftCloud also proposes a novel client-assisted
+failover mechanism that trades latency by a small increase in staleness of
+data.
 
-There is more of distributed/stretched Global Causal Consistent
-Databases\cite{b6}. That work presents potential applications and databases
-that could use the causal consistency and shows possible methods to implement
-that model. It also compares serializability, eventual and causal consistency
-using a running example. There is an important conclusion that to the authors’
-knowledge there is no commercial or mature systems using the causal
-consistency.
+Global/stretched Causal Consistent Databases\cite{b6} work presents potential
+applications and databases that could use the causal consistency and shows
+possible methods to implement that model. It also compares serializability,
+eventual and causal consistency using a running example. There is an important
+conclusion that to the authors’ knowledge there is no commercial or mature
+systems using the causal consistency.
 
 Bolt-on\cite{b13} shim takes another approach and allows to leverage existing
 production-ready eventually consistent data stores virtually upgrading it to
 provide convergent causal consistency.
 
 \begin{itemize}
-  \item \textbf{Open questions}: what generic data replication cases can we
-    break down to be always performed one-way? That simplifies implementation a
-    lot: ``Although most implementations use bidirectional communication, the
-    communication from the update-receiver to the update-sender is just a
-    (significant) performance optimization used to avoid redundant transfers of
-    updates already known to the receiver. One-way convergence is also
-    important in protocols that transmit updates via delay tolerant
-    networks''\cite{b2}. And for the remaining cases, may an API-to-API based
-    synchronization mechanisms fully address the needs for bidirectional data
-    replication? Like predictable cloud users/projects' IDs that require no
-    shared replicating databases.
+  \item \textbf{Open questions}: what of the known generic (common for
+    IaaS/Paas infra and NFV applications) data replication cases can be one-way
+    converged, which simplifies implementation of end system? For the remaining
+    two-way convergent cases, may an API-to-API based synchronization instead
+    fully address the needs for bidirectional data replication?
   \item \textbf{Open questions}: are there open-source projects to benefit
-    OpenStack/Kubernetes cloud platforms for edge cases that rely on multiple
-    autonomous control planes? Either mature or in active development,
+    OpenStack/Kubernetes (and NFV apps) for edge cases that rely on multiple
+    autonomous sites? Either mature ones or in active development,
     implementing a causal consistent database/KVS, like Walter/SwiftCloud, or
     midleware/shims operating on top of such weakly consistent systems, like
     RTC/COPS/Indigo/Bolt-on? For example, SwiftCloud is an open-source project
     available under Apache 2.0 license and might be a good start for future
     work of adopting it for OpenStack/Kubernetes and edge-native applications
-    as RaaS.
+    as RaaS. Combining it with RAMCloud might end up in a powerful NFV option.
   \item \textbf{Open questions}: what of the stretched/global clusters can
     support multi-site failure events, assuming at the edge there may be a lot
     of small failure domains? And which of those can provide two-way
@@ -538,10 +529,16 @@ and under which conditions. E.g. predicted users' trajectories or operations
 involving particular mobile subscribers may help to establish causal relations
 and produce ultimate replication decisions at the applications level.
 StatelessNF\cite{b16} rearchitects NFV applications to decouple its internal
-dynamic state, like connections tracked by firewalls, into a low-latency
-storage tier of underneath VIM or unified RaaS. After that point, the data
-replication tasks become no different to other tasks required by the operational
-invariants of multiple control/management planes.
+dynamic state, like connections tracked by firewalls, into a low-latency DRAM
+storage tier, like one provided by the underneath VIM. StatelessNF relies on
+RAMCloud\cite{b17}, where all data is stored in DRAM. That provides 100-1000x
+lower latency than disk-based systems and 100-1000x greater throughput, which
+greatly reduces possibility of concurrent updates causing non-mergable data
+conflicts. While this benefits NFV cases a lot, RAMCloud does not meet well
+the autonomy requirements we defined for control/management planes. There
+concurrent updates and cross-datacenter replication is inevitable. In such
+setups, RAMCloud has little or no latency advantage and can not be used as
+a unified RaaS solution per se.
 
 A. Lebre et al.\cite{b9} bring vision of a Peer-to-Peer (P2P) OpenStack IaaS
 Manager, which is opposed to hierarchical distributed topologies. It is stated
@@ -611,10 +608,10 @@ OpenStack Summit at Berlin, 2018.
 \bibitem{b1} W. Lloyd, M. J. Freedman, M. Kaminsky, and D. G. Andersen, ``Don’t settle for eventual: Scalable causal consistency for wide-area storage with COPS,'' Proc. 23rd ACM Symposium on Operating Systems Principles (SOSP 11), Cascais, Portugal, October 2011.
 \bibitem{b2} P. Mahajan, L. Alvisi, and M. Dahlin. ``Consistency, availability, and convergence,'' Technical Report TR-11-22, Univ. Texas at Austin, Dept. Comp. Sci., 2011.
 \bibitem{b3} The Linux Foundation, ``Open Glossary of Edge Computing,'' [Online]. Available: \url{https://github.com/State-of-the-Edge/glossary}
-\bibitem{b4} K. Kingsbury, ``Consistency Models,'' [Online]. Available: \url{https://jepsen.io/consistency}
-\bibitem{b5} M. Bayer, ``Global Galera Database,'' [Online]. Available: \url{https://review.openstack.org/600555}
+\bibitem{b4} K. Kingsbury, ``Consistency Models,'' [Online]. Available: \url{https://jepsen.io/consistency}.
+\bibitem{b5} M. Bayer, ``Global Galera Database,'' [Online]. Available: \url{https://review.openstack.org/600555}.
 \bibitem{b6} M. M. Elbushra, J. Lindstrom, ``Causal Consistent Databases'', Open Journal of Databases (OJDB), Volume 2, Issue 1, 2015.
-\bibitem{b7} PRCE (Projet de recherche collaborative — Entreprises), ``RainbowFS: Modular Consistency and Co-designed Massive File'' [Online]. Available: \url{http://rainbowfs.lip6.fr/data/RainbowFS-2016-04-12.pdf}
+\bibitem{b7} PRCE (Projet de recherche collaborative — Entreprises), ``RainbowFS: Modular Consistency and Co-designed Massive File'' [Online]. Available: \url{http://rainbowfs.lip6.fr/data/RainbowFS-2016-04-12.pdf}.
 \bibitem{b8} R. A. Cherrueau, A. Lebre, D. Pertin, F. Wuhib, J. M. Soares, ``Edge Computing Resource Management System: a Critical Building Block! Initiating the debate via OpenStack'', USENIX HotEdge’18 Workshop, 2018.
 \bibitem{b9} A. Lebre, J. Pastor, A. Simonet, F. Desprez, ``Revising OpenStack to Operate Fog/Edge Computing Infrastructures'', IEEE International Conference on Cloud Engineering (IC2E), 2017.
 \bibitem{b10} V. Balegas, N. Preguiça, R. Rodrigues, S. Duarte, C. Ferreira, M. Najafzadeh, M. Shapiro, ``Putting Consistency back into Eventual Consistency'', Euro. Conf. on Computing Systems (EuroSys), Bordeaux, France, 2015.
@@ -624,5 +621,6 @@ OpenStack Summit at Berlin, 2018.
 \bibitem{b14} I. Farris, T. Taleb, H. Flinck, A. Iera, ``Providing ultra‐short latency to user‐centric 5G applications at the mobile network edge'', Transactions on Emerging Telecommunications Technologies, Vol. 29, No. 4, e3169, 2018.
 \bibitem{b15} E. Cau, M. Corici, P. Bellavista, L. Foschini, G. Carella, A. Edmonds, and T. Bohnert, ``Efficient Exploitation of Mobile Edge Computing for Virtualized 5G in EPC Architectures'', MobileCloud, page 100-109. IEEE Computer Society, 2016.
 \bibitem{b16} M. Kablan, A. Alsudais, E. Keller, Franck Le,``Stateless Network Functions: Breaking the Tight Coupling of State and Processing'', NSDI, 97-112, 2017. 44, 2017.
+\bibitem{b17} RAMCloud Project. Available: \url{https://ramcloud.stanford.edu}.
 \end{thebibliography}
 \end{document}
