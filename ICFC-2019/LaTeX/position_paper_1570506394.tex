@@ -179,22 +179,17 @@ Collecting logs, performance and usage statistics for monitoring and alerting
 systems also represents the management plane operations, although it operates
 with the cloud data.
 
-When we refer to an edge aggregation layer and cloudlets under its control or
-management, we mean exactly any operations executed via the C/M planes of that
-edge aggregation layer and targeted for cloudlets sitting down the nested
-connections graph. And a replication topology regulates allowed targets for
-operations and state replication.
-
 \textbf{Causal Consistency}\cite{b6} ensures ordering of relative operations
-only, where all causal related writes issued by $\mathrm{X}$ can be seen in the
-same order by all processes connected to all servers (or at least the same
-server $\mathrm{X}$). Causal dependencies are normally tracked for a version of
-an object, like a key-value pair. And checked before making that version
-visible to the clients or another replica. Causal consistency supports
-non-blocking operations, i.e. allows commiting changes or reading data locally
-for each server, without waiting for global computation. This overcomes
-communication latency, which is the primary limit of strong consistency.
-Cloudlets' autonomy also relies on such non-blocking operations.
+only, where all related writes issued by $\mathrm{X}$ can be seen in the same
+order by all processes connected to all or at least the same server
+$\mathrm{X}$. Dependencies are tracked when changing versions of objects, like
+key-value pairs, and checked before making it visible elsewhere. This provides
+non-blocking operations, i.e. a server (or $\mathrm{W}$ and $\mathrm{R}$ groups
+of ones, where $\mathrm{W + R = N}$) commits data or returns results without
+waiting for the remaining $\mathrm{(N - W)}$ or $\mathrm{(N - R)}$ members. And
+$\mathrm{W = R = 1}$ fully overcomes communication latency - the primary limit
+of strong consistency. Autonomous cloudlets rely on such non-blocking
+operations.
 
 \textbf{Data Replication Conflict}: according to\cite{b1}, two operations on
 the same target are in conflict if they are not causal related. Such
@@ -208,10 +203,10 @@ consistency}\cite{b4} model, i.e. \textit{Real-Time Causal}(RTC)\cite{b2}, or
 \textit{causal+}\cite{b1}. The key constraints and properties are:
 \begin{itemize}
   \item the stickiness property applies so long as clients only talk to the
-    same healty servers, instead of switching to new ones, i.e. maintain sticky
-    sessions.
-  \item the real-time constraint is keeping the system time synchronized for
-    all cloudlets. That is a mandatory constraint for RTC.
+    same of total $\mathrm{N}$ healty servers, instead of switching to new
+    ones.
+  \item the real-time constraint requires the system time synchronized across
+    cloudlets. That is a mandatory constraint for RTC.
   \item \textit{one-way convergence}\cite{b2} is a mandatory constraint for
     RTC.
 \end{itemize}
@@ -412,12 +407,12 @@ C/M planes:
 
 \begin{itemize}
   \item \textbf{Open questions}: what Edge computing cases involving autonomous
-    multiple control planes can be expressed via one-way converged data
-    replication with causality tracked per-key\footnote{according to\cite{b2},
-    one-way convergence greatly simplifies end-to-end implementation}?
-  \item \textbf{Open questions}: for the remaining two-way convergent (i.e.
-    bidirectional) data replication, may an API-to-API based synchronization
-    fully address that?
+    multiple control planes can be expressed via one-way convergent (one-way
+    convergence\cite{b2} greatly simplifies systems implementation) causal
+    per-key consistency?
+\item \textbf{Open questions}: for the remaining two-way convergent cases,
+    may an API-to-API state synchronization replace the low-level data
+    replication?
 \end{itemize}
 
 \subsection{Vision of a Unified State Replication As a Service}
