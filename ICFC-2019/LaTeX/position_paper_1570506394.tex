@@ -315,11 +315,13 @@ related work section).
 
 OpenStack/Kubernetes platforms have yet support for causal consistent storage
 backends nor mature middleware capable driving replication of casual related
-state\footnote{StarlingX:\url{https://storyboard.openstack.org/#!/story/2002842}
-builds on top of the current strongly consistent database backend}. OpenStack
-cloud data is stored in a distributed database\footnote{See an evaluation of
-CockroachDB:\url{https://www.cockroachlabs.com/docs} strongly consistent
-key-value data store:\url{https://github.com/BeyondTheClouds/juice}} based on
+state\footnote{StarlingX:
+\url{https://storyboard.openstack.org/#!/story/2002842} builds on top of the
+current in OpenStack strongly consistent database backend}. OpenStack cloud
+data is stored in a distributed database\footnote{See an evaluation of
+CockroachDB \url{https://www.cockroachlabs.com/docs}, an alternative strongly
+consistent key-value store backend for OpenStack:
+\url{https://github.com/BeyondTheClouds/juice}} based on
 \textit{unavailable}\cite{b4} strongly consistent models, e.g.
 \textit{serializable}\cite{b4}. In OpenShift/Kubernetes clusters state is
 backed with a key-value data store (KVS), which also supports only the strong
@@ -411,13 +413,21 @@ including those targeted for offline cloudlets, may be also processed that way.
 Global/stretched Causal Consistent Databases\cite{b6} work presents potential
 applications and databases that could use the causal consistency and shows
 possible methods to implement that model. It also compares serializability,
-eventual and causal consistency using a running example.
+eventual and causal consistency using a running example. Authors of that work
+stated that there is no commercial or mature systems implementing the causal
+consistency for a global data store.
 
-There are mature systems that implement Dynamo\cite{b17} per-key causal
-consistency:
+There are mature open-source systems that implement Dynamo\cite{b17} per-key
+causal consistency:
 Riak\footnote{\url{https://docs.riak.com/riak/kv/latest/learn/concepts/}},
 Cassandra\footnote{\url{https://github.com/wlloyd/eiger}} and
-Voldemort\footnote{\url{https://github.com/voldemort/voldemort}}.
+Voldemort\footnote{\url{https://github.com/voldemort/voldemort}}. Dynamo
+provides an ``always writeable'' data store where no updates are rejected due
+to failures or concurrent writes and is conceptually close to a ``zero-hop''
+distributed hash table system. It is DC-centric and assumes all cluster
+nodes are trusted. To overcome such limitations of a single administrative
+domain, there is an additional middleware layer may be needed to perform
+data replication across multiple isolated clusters.
 
 COPS\cite{b1} provides theoretical fundamentals for causal+ consistency and
 focuses on highly scalable middleware libraries implementing causal consistent
@@ -426,8 +436,8 @@ that gives strong fundamentals on creating application-centric programming
 methodologies that leverage invariant-repair/violation-avoidance techniques and
 rely on CRDTs. Ultimately, that should help programmers to enforce Explicit
 Consistency by extending existing applications logic and building middleware
-libraries that operate on top of the underlying causal consistent storage
-backends. That is, like Walter\cite{b11} or SwiftCloud\cite{b12}.
+libraries that operate on top of the underlying causal consistent data stores,
+like Walter\cite{b11} or SwiftCloud\cite{b12}.
 
 Walter\cite{b11} KVS uses a set-like CRDTs. It provides a strong consistency
 guarantee within a site and causal ordering across sites. It introduces
@@ -481,14 +491,13 @@ and produce ultimate replication decisions at the applications level.
 StatelessNF\cite{b16} rearchitects NFV applications to decouple its internal
 dynamic state, like connections tracked by firewalls, into a low-latency DRAM
 storage tier, like one provided by the underneath VIM. StatelessNF relies on
-RAMCloud\footnote{\url{https://ramcloud.stanford.edu}}, where all data is
-stored in DRAM. That provides 100-1000x lower latency than disk-based systems
-and 100-1000x greater throughput, which greatly reduces possibility of
-concurrent updates causing non-mergable data conflicts. While this benefits NFV
-cases a lot, RAMCloud may not meet well the defined autonomy requirements for
-C/M planes, where concurrent data updates and cross-datacenter
-replication is inevitable. In such setups, RAMCloud as a potential RaaS
-solution has no more its low-latency advantages.
+RAMCloud\cite{b18}, where all data is stored in DRAM. That provides 100-1000x
+lower latency than disk-based systems and 100-1000x greater throughput, which
+greatly reduces possibility of concurrent updates causing non-mergable data
+conflicts. While this benefits NFV cases a lot, RAMCloud may not meet well the
+defined autonomy requirements for C/M planes, where concurrent data updates and
+cross-datacenter replication is inevitable. In such setups, RAMCloud as a
+potential RaaS solution has no more its low-latency advantages.
 
 A. Lebre et al.\cite{b9} bring vision of a Peer-to-Peer (P2P) OpenStack IaaS
 Manager, which is opposed to hierarchical distributed topologies. It is stated
@@ -513,30 +522,33 @@ consistency price that it strictly requires''\cite{b7}.
   \item \textbf{Open questions}: as RaaS targeted for OpenStack, Kubernetes and
     NFV applications, what mature (or in active development) open-source causal
     consistent data stores support multi-site failures and may fit the edge
-    computing cases, given the defined operational invariants? That can be
-    either of distributed stores, like\cite{b11}\cite{b12}, or middleware,
-    e.g.\cite{b1}\cite{b2}\cite{b7}\cite{b10}\cite{b13}. E.g., SwiftCloud and
-    Voldemort are open-source projects available under Apache 2.0 license and
-    might be a good start. Combining it with RAMCloud might end up in a
+    computing cases, given the defined operational invariants? E.g., SwiftCloud
+    and Voldemort are open-source projects available under Apache 2.0 license
+    and might be a good start. Combining it with RAMCloud might end up in a
     powerful NFV option.
 \end{itemize}
 
 \section{Conclusion}
-We defined autonomy requirements for multiple autonomous C/M planes of Fog and
-MEC environments and imposed operational invariants. That brought us to
-the causal consistency requirement for inter-cloudlets state replication. We
-highlighted challenges of building replication topologies. We propposed design principles, like low-level
-data replication and API-level queuing with delayed replication, aliveness of
-the cloudlets' C/M planes and a unified approach for building ultimate RaaS
-solutions. Such solutions may be based on global per-key causal consistent data
-stores, like Riak/Cassandra/Voldemort, or shims providing multi-site causal
-replication on top of traditional strongly consistent and DC-centric data
-stores, like CockroachDB, or eventual consistent systems. For novel StatelessNF
-applications, its data stores must be DRAM based.
+We defined autonomy requirements for multiple autonomous C/M planes of Fog
+environments and imposed operational invariants. That brought us to the causal
+consistency requirement for inter-cloudlets state replication. We highlighted
+challenges of building replication topologies and propposed design principles,
+like low-level data replication and API-level queuing with delayed replication,
+aliveness of the cloudlets' C/M planes. We brought vision of a unified approach
+for building ultimate RaaS solutions for Fog/MEC envirnoments. Such solutions
+may be based on global causal consistent systems, like \cite{b11}\cite{b12}, or
+middleware shims providing multi-site replication on top of traditional
+DC-centric data stores. That is, ``real'' mature systems, like strongly
+consistent CockroachDB, eventual/per-key causal consistent
+Riak/Cassandra/Voldemort, or based on theoretical/research
+\cite{b1}\cite{b2}\cite{b7}\cite{b10}\cite{b13} systems. With an exception for
+novel StatelessNF applications, where its data stores must be DRAM based, like
+\cite{b18}.
 
 Alternatively, there may be middleware that queues and replicates C/M plane
-operations at an API-to-API high-level. This fits the architecture for hybrid
-clouds.
+operations at an API-to-API high-level. This might better fit the interoperability
+requirements of hybrid cloud architectures and simplify end-to-end
+implementation.
 
 We want to emphasize on the unification principle as the great opportunity for
 developers to bring the best of IaaS and PaaS worlds for end users whom such
@@ -544,9 +556,8 @@ data replication tooling might benefit as a service, i.e. DevOps and tenants
 workloads, like MEC environments and NFV. It is also an opportunity for Telco
 side to leverage the commodity replication services of infrastructure layers
 for the hosted virtual network functions (VNFs). The unification principle also
-applies to any fog-based system and is not limited to OpenStack, Kubernetes or
-NFV ecosystems. We only focus on those as a good starting point for the future
-work.
+applies to any fog-based system and is not limited to OpenStack and Kubernetes
+platforms or NFV cases. We only focus on those as a possible good start.
 
 To draw the line for where/when future work starts, we should remember
 that ``retain workloads operational as the best effort'' principle provides a
@@ -569,12 +580,12 @@ University of Rio de Janeiro. Special thanks to all of the participants of
 OpenStack Summit at Berlin, 2018.
 
 \begin{thebibliography}{00}
-\bibitem{b1} W. Lloyd, M. J. Freedman, M. Kaminsky, D. G. Andersen, ``Don’t settle for eventual: Scalable causal consistency for wide-area storage with COPS'', SOSP, 2011.
+\bibitem{b1} W. Lloyd, M. J. Freedman, M. Kaminsky, D. G. Andersen, ``Don’t settle for eventual: Scalable causal consistency for wide-area storage with COPS'', SOSP, 2011. \newpage
 \bibitem{b2} P. Mahajan, L. Alvisi, M. Dahlin. ``Consistency, availability, and convergence,'' Technical Report TR-11-22, Univ. Texas at Austin, Dept. Comp. Sci., 2011.
 \bibitem{b3} The Linux Foundation, ``Open Glossary of Edge Computing,''
   [Online]. \newline Available: \url{https://github.com/State-of-the-Edge/glossary}
 \bibitem{b4} K. Kingsbury, ``Consistency Models,'' [Online]. Available: \newline \url{https://jepsen.io/consistency}.
-\bibitem{b5} M. Bayer, ``Global Galera Database,'' [Online]. Available: \newline \url{https://review.openstack.org/600555}. \newpage
+\bibitem{b5} M. Bayer, ``Global Galera Database,'' [Online]. Available: \newline \url{https://review.openstack.org/600555}.
 \bibitem{b6} M. M. Elbushra, J. Lindstrom, ``Causal Consistent Databases'', Open Journal of Databases (OJDB), Volume 2, Issue 1, 2015.
 \bibitem{b7} PRCE (Projet de recherche collaborative — Entreprises), ``RainbowFS: Modular Consistency and Co-designed Massive File'' [Online]. Available: \url{http://rainbowfs.lip6.fr/data/RainbowFS-2016-04-12.pdf}.
 \bibitem{b8} R. A. Cherrueau, A. Lebre, D. Pertin, F. Wuhib, J. M. Soares, ``Edge Computing Resource Management System: a Critical Building Block! Initiating the debate via OpenStack'', USENIX HotEdge’18 Workshop, 2018.
@@ -587,5 +598,6 @@ OpenStack Summit at Berlin, 2018.
 \bibitem{b15} E. Cau, M. Corici, P. Bellavista, L. Foschini, G. Carella, A. Edmonds, T. Bohnert, ``Efficient Exploitation of Mobile Edge Computing for Virtualized 5G in EPC Architectures'', MobileCloud, 100-109, 2016.
 \bibitem{b16} M. Kablan, A. Alsudais, E. Keller, Franck Le,``Stateless Network Functions: Breaking the Tight Coupling of State and Processing'', NSDI, 97-112, 2017.
 \bibitem{b17} G. DeCandia, D. Hastorun, M. Jampani, G. Kakulapati, A. Lakshman, A. Pilchin, S. Sivasubramanian, P. Vosshall, W. Vogels, ``Dynamo: Amazon's Highly Available Key-Value Store'', SOSP 2007: 205-220, 2007.
+\bibitem{b18} RAMCloud: \url{https://ramcloud.stanford.edu}
 \end{thebibliography}
 \end{document}
