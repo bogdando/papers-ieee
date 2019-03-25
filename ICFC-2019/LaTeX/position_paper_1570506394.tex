@@ -197,7 +197,7 @@ operations require further reconcilation, i.e. resolving the conflict. There is
 also techniques to avoid such conflicts via immutable Conflict-free Replicated
 Data Types (CRDTs).
 
-\textbf{Always Available}: the operational mode of the C/M planes or
+\textbf{Always Available (AA)}: the operational mode of the C/M planes or
 applications that corresponds to the \textit{sticky available causal
 consistency}\cite{b4} model, i.e. \textit{Real-Time Causal}(RTC)\cite{b2}, or
 \textit{causal+}\cite{b1}. The key constraints and properties are:
@@ -212,117 +212,83 @@ consistency}\cite{b4} model, i.e. \textit{Real-Time Causal}(RTC)\cite{b2}, or
 \end{itemize}
 
 \section{Analysis and Discussion}
-\subsection{Autonomy Requirements}
-We define always available autonomy for cloudlets as the following strict
-requirements:
+\subsection{Always Available Autonomy Requirements}
+We define AA autonomy for all cloudlets, including edge aggregation layers, as
+the following strict requirements:
 
 \subsubsection{Maintain multiple C/M planes}
-Autonomous cloudlets may only operate as always available when having multiple
-C/M planes. For example, when an offline cloudlet cannot start virtual machines
-or containers, that violates the autonomy requirements.
+Autonomous cloudlets may only operate as AA system when having multiple
+C/M planes. F.e, when an offline cloudlet cannot start virtual machines
+or containers, that violates the autonomy requirement.
 
-\subsubsection{Provide no read-only or blocking access for inter-cloudlet
-operations}
-Any operations performed on cloudlets state, despite its aliveness/failure
-conditions as it's shown in the global view of upper edge aggregation layers,
-fit consistency models that allow the involved C/M planes operating as always
-available, and there is no limitations, like read-only or blocking access.
-Operations may be queued for future processing in order to meet this autonomy
-requirement though. Internal state of cloudlets is allowed to keep its failure
-modes unchanged. E.g. its DC-centric quorum requirements still apply for
-internal data transactions. That is a transitioning requirement until the
-internal cloudlets state can be migrated to causal consistent data storages as
-well.
+\subsubsection{Provide non-blocking inter-cloudlet operations}
+Operations issued by edge aggregation layers are never blocked. Depending on
+the cloudlets' aliveness state shown in the global view of a particular
+aggregation layer, operations may be queued for future processing but must
+return futures for its state tracking. Internally, cloudlets may keep its
+quorum reguirements and restrict read/write operations, if needed.
 
 \subsubsection{Provide autonomous C/M plane, whenever possible}
-Operations on cloudlets can be scheduled at any given moment of time. For
-offline/partitioned autonomous cloudlets, that can be done via local C/M plane,
-if it exists and not failed. The same transitioning considerations for internal
-cloudlets state apply.
+For offline/partitioned autonomous cloudlets, operations can be executed via
+local C/M plane, if it exists and is healthy. Further steps for synchronizing
+that local state with the aggregation layers or neighbor peers depend on each
+particular replication topology, like either that is one-way convergent or
+bidirectional, low-level data or API-level state exchange.
 
-\subsubsection{Support fully autonomous (offline) cloudlets}
-Aggregation edge layer cloudlets should allow for arbitrary or all of its
-managed/controlled cloudlets running fully autonomous long-time or indefinitely
-long, queuing any operations targeted for such cloudlets. That is, to have
-failure domains size of a 1. For a permanently disconnected cloudlet it may make
-more sense though to detach it from its adjacent aggregation layer and/or
-reorganize its place taken in the replication topology.
+\subsubsection{Support long-term or permanently offline cloudlets}
+Aggregation edge layers allow running an arbitrary subset of its
+managed/controlled cloudlets fully autonomous for indefinitely long but keeping
+the failure domains as small as possible. For causal consistent data stores
+this involves sloppy quorums and hinted handoffs\cite{b17}. While locally
+queued API operations may be served in a distributed fashion and/or given
+expiration timers to alleviate the increased DRAM pressure.
 
-\subsubsection{Queue operations to keep it always available at the best
-effort}
-Queued operations have to be eventually replayed if/after the C/M plane
-capabilities restored, or dropped (e.g. expired) otherwise. That poses a
-delayed replication principle. If there is intermediate aggregation edge layers
-down the way to the target of the queued operations, the queue may be shared
-across each of the involved aggregation edge layers or optionally, queued
-operations may be distributed across not shared queues. That should reduce the
-associated memory and disc pressure for aggregation layers. Note that we
-induced no ordering constraints for the operations replayed from queues, that
-should be defined on case-by-case basis and ideally maintain ordering of causal
-related operations only, like create a VM and snapshot that VM. Global unique
-IDs may be a good fit for maintaining such a causal ordering.
+\subsubsection{Queue operations for the delayed replication}
+Queued operations will be causally ordered and eventually replayed when the
+uplink/peer connectivity restored, or expired and dropped otherwise. That poses
+the \textit{delayed replication} principle. Note that we induced ordering
+constraint for only related operations, like creating a VM and snapshotting it.
+Global unique IDs for per-key causality may be a good fit here.
 
 \subsubsection{Provide a global view for cloudlets aliveness state}
-Global view of cloudlets needs to be periodically presented for at least one of
-upper aggregation edge layers. For example, with
-the state marks, like ``unknown'', or ``autonomous''; ``synchronizing'',
-``connected''; ``failed'', or ``disconnected'', or ``fenced'', if and only if
-it is confirmed as failed, or manually disconnected, or fenced automatically.
-That poses the principle of aliveness of the cloudlets' C/M planes.
+Global view into cloudlets' health, performance and monitoring metrics is
+periodically presented for at least one of upper aggregation edge layers (or
+neighbor peers). For example, with the state marks, like ``unknown'',
+``autonomous'', ``synchronizing'', ``connected'', ``failed'', ``disconnected''
+or ``fenced''. That poses the principle of \textit{aliveness of the cloudlets'
+C/M planes}. This case may not necessary involve bidirectional data
+replication and serve a good example of one-way convergent data streams.
 
 \subsection{Operational Invariants}
-To be always available as we defined it, control and management planes of
-cloudlets should provide the following operational capabilities
-(\textit{invariants} hereafter):
+To be always available, C/M planes of cloudlets must meet the following
+operational capabilities (invariants):
 
-\subsubsection{Keep control planes always available at best effort}
-CRUD (Create, Read, Update and Delete) operations on cloud data can always be
-requested via API/CLI of local cloudlets or upper layers. The same queuing
-requirements apply as it is defined for the autonomy requirements.
-
-\subsubsection{Do not wait for edge aggregation layers control planes for local
-operations}
-Local CRUD operations for offline cloudlets, if its control plane exists and
-not failed, can be processed without waiting for the upper aggregation layers
-to recover its control over the cloudlets. When a cloudlet is running only
-compute/storage resources, it cannot meet this requirement.
-
-\subsubsection{Allow local scaling of infrastructure edge nodes without waiting
-for management planes of upper aggregation layers}
-Similarly the to control plane operations, deployed infrastructure edge nodes
-can always be scheduled for scaling up/down by the cloudlets local management
-planes, if it is possible (a cloudlet may be relying on the remote
-configuration management only), or via its upper layers. Same queuing
-requirements apply for operations.
-
-\subsubsection{Allow hotfixes and kernel/software updates applied locally for
-cloudlets}
-Security patches and minor system updates, including kernel upgrades, can
-always be scheduled for installation by the same meanings (via operations
-issued locally or by the associated aggregation layers, including the same
-queuing requirements).
-
-\subsubsection{Allow major software versions upgrades applied locally for
-cloudlets}
-Similarly, major versions of system components, like OpenStack or
-OpenShift/Kubernetes platforms, can be always scheduled for upgrades, using the
-same meanings as above.
+\subsubsection{Keep C/M planes AA at best effort}
+Generic API/CLI or configuration managment operations, like software updates,
+can always be processed by cloudlets locally and by its associated peers or
+hierarchical upper layers as well. The same queuing and delayed replication
+considerations as above apply here.
 
 \subsubsection{Provide an extended global view for cloudlets}
-Additionally to the aforementioned global view for cloudlets' C/M
-plane aliveness marks, there needs to be a periodically updated global
-view for each of the edge aggregation layers into its controlled/managed
-cloudlets, at least the adjacent ones, for the key system administration
-aspects, like hardware status, power management, systems state logging,
+Additionally to the aforementioned basic cloudlets' aliveness state marks,
+there is extended periodic data collected and pushed for the upper edge
+aggregation layers or peers. At least for the adjacent (next-hop) cloudlets,
+that covers such metrics as hardware status and power management, logging,
 monitoring and alerting events, performance and metering statistics.
 
-\subsection{State Replication Consistency Requirements}
-As it follows from the defined always available autonomy requirements and
-operational invariants, we define the following data replication
-requirements\footnote{when we refer to \textit{data} or \textit{state}, we
-do not differentiate either that is deployment/cloud data, internal state of
-an NFV application or cloud API operations. That poses the \textbf{unified
-approach principle.}}:
+\subsubsection{Leverage Replication-as-a-Service solutions for storing state}
+Replication-as-a-Service (RaaS) allows detaching state from C/M planes and
+edge-native applications, like StatelessNF\cite{b16}. That turns the such into
+generic stateless workloads easy to manage/migrate across different hybrid
+clouds and/or orchestration engines. While all the complexity of maintaining
+those to be AA and synchronized shifts to that particular RaaS solution.
+
+\subsection{State Replication Consistency Requirements and Recommendations}
+As it follows from the defined AA autonomy requirements and operational
+invariants, there are associated state replication requirements\footnote{when
+we refer to \textit{data} or \textit{state}, we do not differentiate either
+that is deployment/cloud data, internal state of an NFV application or cloud
+API operations. That poses the \textbf{unified approach principle.}}:
 
 \subsubsection{Incorporate convergent conflict handling}
 According to \cite{b1}, conflicts can be resolved automatically, or by hand and
@@ -337,23 +303,18 @@ back to the upper aggregation layers, or pushed down after the autonomous
 cloudlet recovers its uplink connection to the management plane. Or when an NVF
 application performs a handover for user mobility cases in 5G networks. The
 source of truth then may be based on distance/placement instead of timestamps.
+Finally, CRDTs and DRAM stores used all the way, allow minimizing overall
+conflict handling work in end systems.
 
-\subsubsection{Prefer one-way convergence in replication topologies}
-As far as the replication topology and queuing capabilities allow
-that, causal related data can be replicated across cloudlets. Prefer one-way
-convergence and avoid bidirectional replication whenever possible.
+\subsubsection{Prefer per-key causal and one-way convergent replication topologies}
+Inter-cloudlets data replication is costly and should be as minimal as possible.
+When it is inevitable, prefer one-way convergence\cite{b2} and avoid bidirectional
+data replication. This greatly simplifies end systems implementation. And
+per-key causality is well covered in the existing data store systems (see the
+related work section).
 
-\subsubsection{Bidirectional replication is only a nice to have requirement}
-Bidirectional (two-way convergence) data replication is not a strict
-requirement but is nice to have. Indeed, some state needs to be replicated
-one-way from aggregation edge layer to cloudlets under its control/management,
-like virtual machine or hardware provisioning images data. While logs,
-performance and metering statistics may be collected only from cloudlets to its
-upper layers.
-
-OpenStack/Kubernetes, have yet support for neither causal consistent storage
-backends for its cloud/deployment data, nor middleware that could drive
-replication of casual related
+OpenStack/Kubernetes platforms have yet support for causal consistent storage
+backends nor mature middleware capable driving replication of casual related
 state\footnote{StarlingX:\url{https://storyboard.openstack.org/#!/story/2002842}
 builds on top of the current strongly consistent database backend}. OpenStack
 cloud data is stored in a distributed database\footnote{See an evaluation of
@@ -362,17 +323,19 @@ key-value data store:\url{https://github.com/BeyondTheClouds/juice}} based on
 \textit{unavailable}\cite{b4} strongly consistent models, e.g.
 \textit{serializable}\cite{b4}. In OpenShift/Kubernetes clusters state is
 backed with a key-value data store (KVS), which also supports only the strong
-consistency. These do not scale across datacentres, which poses an open
-opportunity for designing such causal consistent state replication systems.
+consistency. These do not scale across multiple datacentres, which poses an
+open opportunity for adopting of either of the existing causal consistent data
+stores. Or maybe designing RaaS middleware for inter-cloudlets state exchange
+over weakly (eventually) consistent data stores.
 
-From the other side, the \textit{total available}\cite{b4} consistency models
-weaker than causal or eventual, leave the programmers of end systems to deal
+Beware that the \textit{total available}\cite{b4} consistency models are
+weaker than causal/eventual and leave the programmers of end systems to deal
 with \textit{fuzzy reads}\cite{b4}, \textit{phantoms}\cite{b4}, discarded
 write-only transactions or empty state returned for any reads.
 
 \subsection{Data Replication Challenges}
-All that brings us to challenges that need to be addressed for multiple
-C/M planes:
+All that brings us to challenges that need to be addressed for multiple C/M
+planes of edge clouds:
 \begin{itemize}
   \item identifying types of C/M operations and replicated
     data, when grouping those into particular replication topologies. Such
@@ -399,16 +362,15 @@ C/M planes:
     aggregation layers or peers to be added dynamically or statically, when the
     load exceeds hardware capabilities of a particular aggregation site.
   \item programming middleware that abides the unified approach and fits the
-    targeted Replication-as-a-Service (RaaS) cases for IaaS/Paas control and
-    management planes as well as the edge-native, like NFV, workloads. For the
-    most of the cases, one size does not fit all, so future RaaS solutions
-    should be tightly coupled with its suggested replication topologies.
+    targeted RaaS cases for IaaS/Paas control and management planes as well as
+    the edge-native, like NFV, workloads. For the most of the cases, one size
+    does not fit all, so future RaaS solutions should be tightly coupled with
+    its suggested replication topologies.
 \end{itemize}
 
 \begin{itemize}
   \item \textbf{Open questions}: what Edge computing cases involving autonomous
-    multiple control planes can be expressed via one-way convergent (one-way
-    convergence\cite{b2} greatly simplifies systems implementation) causal
+    multiple control planes can be expressed via one-way convergent causal
     per-key consistency?
 \item \textbf{Open questions}: for the remaining two-way convergent cases,
     may an API-to-API state synchronization replace the low-level data
@@ -451,12 +413,11 @@ applications and databases that could use the causal consistency and shows
 possible methods to implement that model. It also compares serializability,
 eventual and causal consistency using a running example.
 
-There are mature enough systems that implement Dynamo\cite{b17} causal
-consistency tracked per-key:
+There are mature systems that implement Dynamo\cite{b17} per-key causal
+consistency:
 Riak\footnote{\url{https://docs.riak.com/riak/kv/latest/learn/concepts/}},
 Cassandra\footnote{\url{https://github.com/wlloyd/eiger}} and
 Voldemort\footnote{\url{https://github.com/voldemort/voldemort}}.
-TODO alternatives: causal consistency per server (sticky?) and per replica(?)
 
 COPS\cite{b1} provides theoretical fundamentals for causal+ consistency and
 focuses on highly scalable middleware libraries implementing causal consistent
@@ -562,23 +523,20 @@ consistency price that it strictly requires''\cite{b7}.
 
 \section{Conclusion}
 We defined autonomy requirements for multiple autonomous C/M planes of Fog and
-MEC environments and imposed operational invariants off it. That brought us to
+MEC environments and imposed operational invariants. That brought us to
 the causal consistency requirement for inter-cloudlets state replication. We
-introduced concepts for building replication topologies and described
-challenges associated with that. We propposed design principles, like low-level
+highlighted challenges of building replication topologies. We propposed design principles, like low-level
 data replication and API-level queuing with delayed replication, aliveness of
 the cloudlets' C/M planes and a unified approach for building ultimate RaaS
 solutions. Such solutions may be based on global per-key causal consistent data
 stores, like Riak/Cassandra/Voldemort, or shims providing multi-site causal
 replication on top of traditional strongly consistent and DC-centric data
-stores, like CockroachDB, or weaker (eventual) consistent systems as well. For
-novel StatelessNF applications, its data stores must be DRAM based. That is all
-to synchronize data only and maintain causal consistency low-level.
+stores, like CockroachDB, or eventual consistent systems. For novel StatelessNF
+applications, its data stores must be DRAM based.
+
 Alternatively, there may be middleware that queues and replicates C/M plane
-operations at an API-to-API high-level.  The latter is well suited for hybrid
-clouds architecture. For novel StatelessNF applications, its data stores must
-be DRAM based. That all poses a major problem for composing a unified RaaS what
-benefits all.
+operations at an API-to-API high-level. This fits the architecture for hybrid
+clouds.
 
 We want to emphasize on the unification principle as the great opportunity for
 developers to bring the best of IaaS and PaaS worlds for end users whom such
@@ -616,7 +574,7 @@ OpenStack Summit at Berlin, 2018.
 \bibitem{b3} The Linux Foundation, ``Open Glossary of Edge Computing,''
   [Online]. \newline Available: \url{https://github.com/State-of-the-Edge/glossary}
 \bibitem{b4} K. Kingsbury, ``Consistency Models,'' [Online]. Available: \newline \url{https://jepsen.io/consistency}.
-\bibitem{b5} M. Bayer, ``Global Galera Database,'' [Online]. Available: \newline \url{https://review.openstack.org/600555}.
+\bibitem{b5} M. Bayer, ``Global Galera Database,'' [Online]. Available: \newline \url{https://review.openstack.org/600555}. \newpage
 \bibitem{b6} M. M. Elbushra, J. Lindstrom, ``Causal Consistent Databases'', Open Journal of Databases (OJDB), Volume 2, Issue 1, 2015.
 \bibitem{b7} PRCE (Projet de recherche collaborative — Entreprises), ``RainbowFS: Modular Consistency and Co-designed Massive File'' [Online]. Available: \url{http://rainbowfs.lip6.fr/data/RainbowFS-2016-04-12.pdf}.
 \bibitem{b8} R. A. Cherrueau, A. Lebre, D. Pertin, F. Wuhib, J. M. Soares, ``Edge Computing Resource Management System: a Critical Building Block! Initiating the debate via OpenStack'', USENIX HotEdge’18 Workshop, 2018.
