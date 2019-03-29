@@ -191,22 +191,24 @@ $\mathrm{W = R = 1}$ fully overcomes communication latency - the primary limit
 of strong consistency. Autonomous cloudlets rely on such non-blocking
 operations.
 
-\textbf{Data Replication Conflict}: according to\cite{b1}, two operations on
-the same target are in conflict if they are not causal related. Such
-operations require further reconciliation, i.e. resolving the conflict. There is
-also techniques to avoid such conflicts via immutable Conflict-free Replicated
-Data Types (CRDTs).
+\textbf{Data Replication Conflict}: two operations on the same target are in
+conflict if they are not causal related. Such operations require further
+reconciliation, i.e. resolving the conflict. Conflict-free Replicated Data
+Types (CRDTs) and DRAM stores used all the way, allow minimizing overall
+conflict handling work in end systems.
 
 \textbf{Always Available (AA)}: the operational mode of the C/M planes or
-applications that corresponds to the \textit{sticky available causal
-consistency}\cite{b4} model, i.e. \textit{Real-Time Causal}(RTC)\cite{b2}, or
-\textit{causal+}\cite{b1}. The key constraints and properties are:
+applications that corresponds to the strongest (i.e. causal) consistency
+possible without giving up the low-latency or non-blocking operations. That
+is like \textit{sticky available causal consistency}\cite{b4} model and
+\textit{Real-Time Causal}(RTC)\cite{b2}, where:
 \begin{itemize}
   \item the stickiness property applies so long as clients only talk to the
     same of total $\mathrm{N}$ healthy servers, instead of switching to new
     ones.
   \item the real-time constraint requires the system time synchronized across
-    cloudlets. That is a mandatory constraint for RTC.
+    cloudlets. That is a mandatory constraint for RTC, which is proved to be
+    the strongest among other causal consistent data models.
   \item \textit{one-way convergence}\cite{b2} is a mandatory constraint for
     RTC.
 \end{itemize}
@@ -241,7 +243,7 @@ managed/controlled cloudlets fully autonomous for indefinitely long but keeping
 the failure domains as small as possible. For causal consistent low-level data
 stores this involves sloppy quorums and hinted handoffs\cite{b17}. While the
 level higher, queued API operations may be served in a distributed fashion
-and/or given expiration timers to alleviate the increased DRAM pressure.
+and/or given expiration timers to alleviate the increased RAM pressure.
 
 \subsubsection{Queue operations for the delayed replication}
 Queued operations will be causally ordered and eventually replayed when the
@@ -291,20 +293,18 @@ that is deployment/cloud data, internal state of an NFV application or cloud
 API operations. That poses the \textbf{unified approach principle.}}:
 
 \subsubsection{Incorporate convergent conflict handling}
-According to \cite{b1}, conflicts can be resolved automatically, or by hand and
-maintained as causal related only after that reconciliation is complete. The
-conflicts resolving strategies should vary on case-by-case basis.
-Last-writer-wins (LWW) systems\cite{b1}\cite{b13} may be best for
-reconciling operations issued by multiple control planes. While ``return them
-all''\cite{b1}\cite{b17} strategy better fits the configuration management tasks
-performed on autonomous cloudlets. Whereby conflicts may have to be reconciled
-differently when a configuration was either applied locally and is replicated
-back to the upper aggregation layers, or pushed down after the autonomous
-cloudlet recovers its uplink connection to the management plane. Or when an NVF
-application performs a handover for user mobility cases in 5G networks. The
-source of truth then may be based on distance/placement instead of timestamps.
-Finally, CRDTs and DRAM stores used all the way, allow minimizing overall
-conflict handling work in end systems.
+Conflicting operations can only be maintained as causal related after
+reconciled, either internally for data replicas or with application-specific
+functions upon accessing such conflicting data. Last-writer-wins (LWW)
+systems\cite{b1}\cite{b13} may be best for reconciling operations issued by
+multiple control planes. While ``return them all''\cite{b17} strategy better
+fits the configuration management tasks performed on autonomous cloudlets.
+Whereby conflicts may have to be reconciled differently and depend on either
+the configuration was applied locally and is replicated back to the upper
+aggregation layers, or pushed down after the autonomous cloudlet recovers its
+uplink connection to the management plane. Or when an NVF application performs
+a handover for user mobility cases in 5G networks. The source of truth then may
+be based on the distance/location instead of timestamps.
 
 \subsubsection{Prefer per-key causal and one-way convergent replication topologies}
 Inter-cloudlets data replication is costly and should be as minimal as possible.
@@ -402,16 +402,21 @@ to failures or concurrent writes and is conceptually close to a ``zero-hop''
 distributed hash table (DHT) system. It is DC-centric and assumes all cluster
 nodes are trusted. To overcome such limitations of a single administrative
 domain, there is an additional middleware layer may be needed to perform data
-replication across multiple isolated clusters.
-
-COPS\cite{b1} provides theoretical fundamentals for causal+ consistency and
-focuses on highly scalable middleware libraries implementing causal consistent
-data operations. The similar approach is taken for Indigo middleware\cite{b10}
+replication across multiple isolated clusters. Like Indigo middleware\cite{b10}
 that gives strong fundamentals on creating application-centric programming
 methodologies that leverage invariant-repair/violation-avoidance techniques and
 rely on CRDTs. Ultimately, that should help programmers to enforce Explicit
 Consistency by extending existing applications logic and building middleware
 libraries that operate on top of the underlying causal consistent data stores.
+
+Eiger\cite{b1} presents geo-replicated data store where causal consistency is
+tracked per operations instead of per-key. In indroduces read-only and
+write-only transactions for keys spread across many servers. Such transactions
+are atomic within a datacenter, but not globally, which guarantees low-latency
+and never-blocking operations. Eiger supports Cassandra's\cite{b25} rich data
+model (richer than simple key-value pairs) pioneered by Google's Bigtable\cite{b26},
+which was designed to scale to petabytes of data across thousands of commodity
+servers. There is also a research fork of Cassandra implementing Eiger\cite{b23}.
 
 Walter\cite{b11} KVS uses a set-like CRDTs. It provides a strong consistency
 guarantee within a site and causal ordering across sites. It introduces
@@ -464,14 +469,14 @@ involving particular mobile subscribers may help to establish causal relations
 and produce ultimate replication decisions at the application levels.
 StatelessNF\cite{b16} rearchitects NFV applications to decouple its internal
 dynamic state, like connections tracked by firewalls, into a low-latency DRAM
-storage tier, like the one provided by the underneath VIM. StatelessNF relies on
-RAMCloud\cite{b18}, where all data is stored in DRAM. That provides 100-1000x
-lower latency than disk-based systems and 100-1000x greater throughput, which
-greatly reduces possibility of concurrent updates causing non-mergeable data
-conflicts. While this benefits NFV cases a lot, RAMCloud may not meet well the
-defined autonomy requirements for C/M planes, where concurrent data updates and
-cross-datacenter replication is inevitable. In such setups, RAMCloud as a
-potential RaaS solution has no more its low-latency advantages.
+storage tier of RAMCloud\cite{b18}. It provides 100-1000x lower latency than
+disk-based systems and 100-1000x greater throughput, which greatly reduces
+possibility of concurrent updates causing non-mergeable data conflicts. While
+this benefits NFV cases a lot, RAMCloud per se can not meet the defined autonomy
+requirements for C/M planes, where concurrent data updates and cross-datacenter
+replication is inevitable. In such setups, RAMCloud as a potential RaaS
+solution has no more its low-latency advantages. But other DRAM stores might
+still be helpful as a local caching layers.
 
 A. Lebre et al.\cite{b9} bring vision of a Peer-to-Peer (P2P) OpenStack IaaS
 Manager, which is opposed to hierarchical distributed topologies. It is stated
@@ -542,9 +547,8 @@ DHT-like open-source derivatives of\cite{b17} KVS system. With an exception for
 novel StatelessNF applications's dynamic state must be DRAM based, like
 \cite{b18}, or assisted with local in-memory caching. That RaaS should also
 include middleware layers that provide programming interfaces for proxying of
-API operations (i.e. queuing/dequeuing with causal ordering preserved),
-atomic data reads/writes and read(-only)/write(-only) transactions for keys
-spread across many servers and sites. So end clients can access it in a
+API operations (i.e. queuing/dequeuing with causal ordering preserved) and
+atomic updates/transactions\cite{b1}. So end clients can access it in a
 causally consistent and always available fashion. Finally, edge-native
 applications and cloud infrastructure components (the end clients) on
 case-by-case basis need to implement its conflicts-free CRDT types and/or data
@@ -575,8 +579,9 @@ University of Rio de Janeiro. Special thanks to all of the participants of
 OpenStack Summit at Berlin, 2018.
 
 \begin{thebibliography}{00}
-\bibitem{b1} W. Lloyd, M. J. Freedman, M. Kaminsky, D. G. Andersen, ``Don’t settle for eventual: Scalable causal consistency for wide-area storage with COPS'', SOSP, 2011.
-\bibitem{b2} P. Mahajan, L. Alvisi, M. Dahlin. ``Consistency, availability, and convergence,'' Technical Report TR-11-22, Univ. Texas at Austin, Dept. Comp. Sci., 2011. \newpage
+\bibitem{b1} W. Lloyd, M. J. Freedman, M. Kaminsky, D. G. Andersen, ``Stronger Semantics for Low-Latency Geo-Replicated Storage'', NSDI'13, 2013.
+\newpage
+\bibitem{b2} P. Mahajan, L. Alvisi, M. Dahlin. ``Consistency, availability, and convergence,'' Technical Report TR-11-22, Univ. Texas at Austin, Dept. Comp. Sci., 2011.
 \bibitem{b3} The Linux Foundation, ``Open Glossary of Edge Computing,'' [Online]. \newline Available: \url{https://github.com/State-of-the-Edge/glossary}.
 \bibitem{b4} K. Kingsbury, ``Consistency Models,'' [Online]. Available: \newline \url{https://jepsen.io/consistency}.
 \bibitem{b5} M. Bayer, ``Global Galera Database,'' [Online]. Available: \newline \url{https://review.openstack.org/600555}.
@@ -599,5 +604,7 @@ OpenStack Summit at Berlin, 2018.
 \bibitem{b22} CockroachDB: \url{https://www.cockroachlabs.com/docs}.
 \bibitem{b23} Cassandra-Eiger: \url{https://github.com/wlloyd/eiger}.
 \bibitem{b24} StarlingX: \url{https://www.starlingx.io/}.
+\bibitem{b25} A. Lakshman, P. Malik. ``Cassandra – a decentralized structured storage system''. LADIS, 2009.
+\bibitem{b26} F. Chang, J. Dean, S. Ghemawat, W. C. Hsieh, D. A. Wallach, M. Burrows, T. Chandra, A. Fikes, R. E. Gruber, ``Bigtable: A distributed storage system for structured data'', ACM TOCS, 26(2), 2008.
 \end{thebibliography}
 \end{document}
