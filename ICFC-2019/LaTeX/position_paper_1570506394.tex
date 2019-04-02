@@ -180,16 +180,14 @@ systems also represents the management plane operations, although it operates
 with the cloud data.
 
 \textbf{Causal Consistency}\cite{b6} ensures ordering of relative operations
-only, where all related writes issued by $\mathrm{X}$ can be seen in the same
-order by all processes connected to all or at least the same server
-$\mathrm{X}$. Dependencies are tracked when changing versions of objects, like
-key-value pairs, and checked before making it visible elsewhere. This provides
-non-blocking operations, i.e. a server (or $\mathrm{W}$ and $\mathrm{R}$ groups
-of ones, where $\mathrm{W + R = N}$) commits data or returns results without
-waiting for the remaining $\mathrm{(N - W)}$ or $\mathrm{(N - R)}$ members. And
-$\mathrm{W = R = 1}$ fully overcomes communication latency - the primary limit
-of strong consistency. Autonomous cloudlets rely on such non-blocking
-operations.
+only, where all related writes can be seen in the same order by all
+processes/clients connected to all (or at least the same) server(s).
+Dependencies are tracked when changing versions of objects, like key-value
+pairs, and checked before making it visible elsewhere. This provides
+non-blocking operations and overcomes communication latency - the primary limit
+of strong consistency, where operations may block on waiting for the global
+computation results. Autonomous cloudlets and edge-native applications may be
+relying on such non-blocking operations.
 
 \textbf{Data Replication Conflict}: two operations on the same target are in
 conflict if they are not causal related. Such operations require further
@@ -396,7 +394,7 @@ running example. The work concludes that there is no commercial or mature
 systems implementing the causal consistency for a global data store.
 
 There are open-source systems that implement Dynamo\cite{b17} per-key causal
-consistency: Riak-Dynamo\cite{b19} and LinkedIn's Voldemort\cite{b20}. Dynamo
+consistency: Riak\cite{b19} and LinkedIn's Voldemort\cite{b20}. Dynamo
 provides an ``always writable'' data store where no updates are rejected due
 to failures or concurrent writes and is conceptually close to a ``zero-hop''
 distributed hash table (DHT) system. It is DC-centric and assumes all cluster
@@ -500,11 +498,11 @@ consistency price that it strictly requires''\cite{b7}.
 \begin{itemize}
   \item \textbf{Open questions}: as RaaS targeted for OpenStack, Kubernetes and
     NFV applications, what mature (or in active development) open-source causal
-    consistent data stores support multi-site failures and may fit the edge
-    computing cases, given the defined operational invariants? E.g.\cite{b12}
-    \cite{b20} and \cite{b23} are open-source projects available under
-    Apache 2.0 license and might be a good start. Augmenting it with local
-    in-memory caching might end up in a powerful RaaS option for NFV as well.
+    consistent data store fits the identified edge computing cases, given the
+    defined operational invariants?  E.g.\cite{b12}\cite{b19}\cite{b20} and
+    \cite{b23} are open-source projects available under Apache 2.0 license and
+    might be a good start for building such RaaS system. Augmenting it with
+    local in-memory caching might end up in a powerful option for NFV as well.
 \end{itemize}
 
 \section{Conclusion}
@@ -542,21 +540,19 @@ fog environments with multiple clusters and latency-sensitive workloads.
 Neither there is support for causal consistent data backends, nor middleware
 capable driving of replication of casual related state. We see future work in
 integrating OpenStack and Kubernetes as a hybrid edge computing platform that
-leverages a common RaaS solution with its data backends based on the existing
-DHT-like open-source derivatives of\cite{b17} KVS system. With an exception for
-novel StatelessNF applications's dynamic state must be DRAM based, like
-\cite{b18}, or assisted with local in-memory caching. That RaaS should also
-include middleware layers that provide programming interfaces for proxying of
-API operations (i.e. queuing/dequeuing with causal ordering preserved) and
-atomic updates/transactions\cite{b1}. So end clients can access it in a
-causally consistent and always available fashion. Finally, edge-native
-applications and cloud infrastructure components (the end clients) on
-case-by-case basis need to implement its conflicts-free CRDT types and/or data
-reconciliation protocols, e.g. picking a single value from a returned versioned
-vector containing all results of the conflicting writes performed on a key by
-concurrent non-mergable transactions. Whenever possible, an API-to-API
-synchronization should be prefered over low-level data operations and one-way
-convergent causality over bidirectional state replication.
+leverages a common RaaS solution. Whereby its supported data backend may be
+DHT-like open-source derivatives of\cite{b17} KVS or Bigtable-like systems for
+richer data models. With a caveat for novel StatelessNF applications's dynamic
+state must be DRAM based, like \cite{b18}, or assisted with local in-memory
+caching backends. That RaaS should also include middleware layers that provide
+programming interfaces for proxying of API operations (i.e. queuing/dequeuing
+with causal ordering preserved) and atomic updates/transactions\cite{b1}. So
+end clients can access it in a causally consistent and always available
+fashion. Finally, edge-native applications and cloud infrastructure components
+(the end clients) on case-by-case basis need to implement its conflicts-free
+CRDT types and/or semantic reconciliation protocols. Whenever applicable, an
+API-to-API synchronization may be prefered over low-level data operations and
+one-way convergent causality over bidirectional state replication.
 
 To draw the line for where/when future work starts, we should remember
 that ``retain workloads operational as the best effort'' principle provides a
@@ -580,8 +576,8 @@ OpenStack Summit at Berlin, 2018.
 
 \begin{thebibliography}{00}
 \bibitem{b1} W. Lloyd, M. J. Freedman, M. Kaminsky, D. G. Andersen, ``Stronger Semantics for Low-Latency Geo-Replicated Storage'', NSDI'13, 2013.
-\newpage
 \bibitem{b2} P. Mahajan, L. Alvisi, M. Dahlin. ``Consistency, availability, and convergence,'' Technical Report TR-11-22, Univ. Texas at Austin, Dept. Comp. Sci., 2011.
+\newpage
 \bibitem{b3} The Linux Foundation, ``Open Glossary of Edge Computing,'' [Online]. \newline Available: \url{https://github.com/State-of-the-Edge/glossary}.
 \bibitem{b4} K. Kingsbury, ``Consistency Models,'' [Online]. Available: \newline \url{https://jepsen.io/consistency}.
 \bibitem{b5} M. Bayer, ``Global Galera Database,'' [Online]. Available: \newline \url{https://review.openstack.org/600555}.
@@ -598,7 +594,7 @@ OpenStack Summit at Berlin, 2018.
 \bibitem{b16} M. Kablan, A. Alsudais, E. Keller, Franck Le,``Stateless Network Functions: Breaking the Tight Coupling of State and Processing'', NSDI, 97-112, 2017.
 \bibitem{b17} G. DeCandia, D. Hastorun, M. Jampani, G. Kakulapati, A. Lakshman, A. Pilchin, S. Sivasubramanian, P. Vosshall, W. Vogels, ``Dynamo: Amazon's Highly Available Key-Value Store'', SOSP 2007: 205-220, 2007.
 \bibitem{b18} RAMCloud: \url{https://ramcloud.stanford.edu}.
-\bibitem{b19} Riak-Dynamo: \newline \url{https://docs.riak.com/riak/kv/latest/learn/dynamo/index.html}.
+\bibitem{b19} Riak: \url{https://docs.riak.com/riak/kv/latest/learn/dynamo/index.html}.
 \bibitem{b20} Voldemort: \url{https://github.com/voldemort/voldemort}.
 \bibitem{b21} Juice: \url{https://github.com/BeyondTheClouds/juice}.
 \bibitem{b22} CockroachDB: \url{https://www.cockroachlabs.com/docs}.
