@@ -32,23 +32,23 @@ Challenges\\
 
 \begin{abstract}
 Fog computing is an emerging paradigm aiming at bringing cloud functions closer
-to the end users and data sources. Traditional DC-centric DevOps paradigms
-established for cloud computing should also span to Edge clouds, which expects
-them being always manageable and available for monitoring/alerting, scaling,
-upgrading and applying security fixes. That is a challenge as classic methods
-do not fit edge cases. Data synchronization is also a common issue for
-IaaS/PaaS platforms and Mobile Edge Computing environments hosted there. In
-this paper, we aim at initiating discussions around that challenge. We define
-operational invariants for Edge clouds based on the Always Available autonomy
-requirement and related state-of-art work. We evaluate global/replicated causal
-consistent data stores and middleware as possible match for meeting those
-invariants. We point out a great opportunity for designing causal consistent
-systems for edge cases as a common solution for cloud infrastructure owners,
-DevOps/SRE and MEC applications. Finally, we bring vision of
-Replication-as-a-Service, unified design approach to benefit applications, like
-NFV/StatelessNF, and cloud middleware/APIs. Having RaaS implemented as
-vendors-agnostic commodity software/storage systems that provide
-interoperability over hybrid clouds and multiple service providers is the
+to the end users and data sources. Traditional DC-centric DevOps/SRE
+established for cloud computing should also work for Fog/Edge clouds. That
+expects them being always available for gathering metrics, monitoring/alerting,
+scaling, and updating. And that is a challenge as the classic methods cannot
+fit it for Edge. Aggregating and geo-sharing huge and often conflicting data is
+another challenge common for IaaS/PaaS platforms, IoT, Telco NFV and Mobile
+Edge Computing. In this paper, we aim at initiating discussions around such
+challenges. We define operational invariants for Edge clouds based on the
+Always Available requirement and related state-of-art work. We evaluate
+geo-replicated causal consistent data stores and middleware as a possible
+match. We point out a great opportunity for designing such distributed systems
+as a unified solution for cloud infrastructure admins, DevOps automation
+functions and edge-native applications. Finally, we bring vision of
+Replication-as-a-Service, a unified design approach to benefit NFV/StatelessNF,
+cloud APIs, management/control systems and IoT middleware. We believe that
+having RaaS implemented as vendors-agnostic commodity opensource software that
+provides interoperability over hybrid clouds and multiple providers is the
 ultimate mission for future work.
 \end{abstract}
 
@@ -213,8 +213,8 @@ is like \textit{sticky available causal consistency}\cite{b4} model and
 
 \section{Analysis and Discussion}
 \subsection{Always Available Autonomy Requirements}
-We define AA autonomy for all cloudlets, including edge aggregation layers, as
-the following strict requirements:
+IoT gateways\cite{b27} serve a good example here, when representing the attached
+offline constrained devices to applications for global discovery and access.
 
 \subsubsection{Maintain multiple C/M planes}
 Autonomous cloudlets may only operate as AA system when having multiple
@@ -251,7 +251,7 @@ constraint for only related operations, like creating a VM and snapshotting it.
 Global unique IDs for per-key causality may be a good fit here.
 
 \subsubsection{Provide a global view for cloudlets aliveness state}
-Global view into cloudlets' health, performance and monitoring metrics is
+Global view into cloudlets' telemetry is
 periodically presented for at least one of upper aggregation edge layers (or
 neighbor peers). For example, with the state marks, like ``unknown'',
 ``autonomous'', ``synchronizing'', ``connected'', ``failed'', ``disconnected''
@@ -368,7 +368,7 @@ is challenging, whenever it is reimplemented for a key-value store (KVS) or
 added new middleware for replicating data across multiple clusters. But
 ultimately that enables the most seamless integration of OpenStack and
 Kubernetes platforms into a powerful RaaS solution with a potential of
-targeting also MEC environments and Telco NFV cases.
+targeting also IoT, MEC environments and Telco NFV cases.
 
 Client libraries implementing such RaaS solutions may provide that unification
 layer via replicating data across different KVS/DB backends and/or replicating
@@ -499,7 +499,7 @@ consistency price that it strictly requires''\cite{b7}.
   \item \textbf{Open questions}: as RaaS targeted for OpenStack, Kubernetes and
     NFV applications, what mature (or in active development) open-source causal
     consistent data store fits the identified edge computing cases, given the
-    defined operational invariants?  E.g.\cite{b12}\cite{b19}\cite{b20} and
+    defined operational invariants? E.g.\cite{b12}\cite{b19}\cite{b20} and
     \cite{b23} are open-source projects available under Apache 2.0 license and
     might be a good start for building such RaaS system. Augmenting it with
     local in-memory caching might end up in a powerful option for NFV as well.
@@ -528,11 +528,12 @@ clouds) architectures and simplify end-to-end implementation.
 We want to emphasize on the unification principle as the great opportunity for
 developers to bring the best of IaaS and PaaS worlds for end users whom such
 data replication tooling might benefit as a service, i.e. DevOps and tenants
-workloads, like MEC environments and NFV. It is also an opportunity for Telco
-side to leverage the commodity replication services of infrastructure layers
-for the hosted virtual network functions (VNFs). The unification principle also
-applies to any fog-based system and is not limited to OpenStack and Kubernetes
-platforms or NFV cases. We only focus on those as a possible good start.
+workloads, like MEC environments, IoT and NFV. It is also an opportunity for
+Telco side to leverage the commodity replication services of infrastructure
+layers for the hosted virtual network functions (VNFs). The unification
+principle also applies to any fog-based system and is not limited to OpenStack
+and Kubernetes platforms or NFV cases. We only focus on those as a possible
+good start.
 
 As of today, OpenStack and Kubernetes cloud platforms rely on DC-centric data
 stores that provide only strong consistency guarantees and do not scale into
@@ -548,11 +549,13 @@ caching backends. That RaaS should also include middleware layers that provide
 programming interfaces for proxying of API operations (i.e. queuing/dequeuing
 with causal ordering preserved) and atomic updates/transactions\cite{b1}. So
 end clients can access it in a causally consistent and always available
-fashion. Finally, edge-native applications and cloud infrastructure components
-(the end clients) on case-by-case basis need to implement its conflicts-free
-CRDT types and/or semantic reconciliation protocols. Whenever applicable, an
-API-to-API synchronization may be prefered over low-level data operations and
-one-way convergent causality over bidirectional state replication.
+fashion. Edge-native applications and cloud infrastructure components on
+case-by-case basis may need to implement its CRDTs and/or semantic
+reconciliation protocols. Whenever applicable, an API-to-API synchronization
+should be prefered over low-level data operations and one-way convergent
+causality over bidirectional state replication. Finally, DHT/P2P-based
+federations\cite{b27} should be considered over traditional hierarchical
+topologies.
 
 To draw the line for where/when future work starts, we should remember
 that ``retain workloads operational as the best effort'' principle provides a
@@ -600,7 +603,8 @@ OpenStack Summit at Berlin, 2018.
 \bibitem{b22} CockroachDB: \url{https://www.cockroachlabs.com/docs}.
 \bibitem{b23} Cassandra-Eiger: \url{https://github.com/wlloyd/eiger}.
 \bibitem{b24} StarlingX: \url{https://www.starlingx.io/}.
-\bibitem{b25} A. Lakshman, P. Malik. ``Cassandra – a decentralized structured storage system''. LADIS, 2009.
+\bibitem{b25} A. Lakshman, P. Malik. ``Cassandra – a decentralized structured storage system'', LADIS, 2009.
 \bibitem{b26} F. Chang, J. Dean, S. Ghemawat, W. C. Hsieh, D. A. Wallach, M. Burrows, T. Chandra, A. Fikes, R. E. Gruber, ``Bigtable: A distributed storage system for structured data'', ACM TOCS, 26(2), 2008.
+\bibitem{b27} G. Tanganelli, C. Vallati, E. Mingozzi, ``Edge-Centric Distributed Discovery and Access in the Internet of Things'', IEEE Internet Things J. 5(1), 425–438, 2018.
 \end{thebibliography}
 \end{document}
