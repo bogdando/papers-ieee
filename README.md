@@ -7,17 +7,28 @@ See also:
 * [Template source](https://www.ieee.org/content/dam/ieee-org/ieee/web/org/conferences/Conference-LaTeX-template_7-9-18.zip) -
   it is also stored in `./examples`.
 
-# in the current development (looking for co-authors!)
+# In development (looking for co-authors!)
 
-A position paper for [ICFC 2019](http://conferences.computer.org/ICFC/2019/),
-IEEE International Conference on Cloud Engineering, 2019.
+* DRAFT: [Multi-Cloud Edge Computing Challenges (Short Positioning Document)](./ICFC-2019/LaTeX/position_paper_1570506394.tex)
 
-Please contribute for [draft contents](./ICFC-2019/contents.md), deadline is
-Nov 8, 2018 (but may be extended hopefully). To add you as an author, please
-let me know (mailto:bdobreli@redhat.com, #bogdando at freenode IRC) your EDAS ID.
-To register, visit [EDAS info page](https://edas.info).
+To become a co-author, please contribute for the following topics:
 
-# build steps
+* Clarify why geo-replicated causal consistent data stores match the fog
+  computing environments.
+* Bring a concrete NF application example to motivate key challenges and
+  articulate why geo-replicated causal consistent data stores are the solution
+  that should also become a unified Replication-as-a-Service solution.
+* Aside of data stores, elaborate on: resource management (Day 1 and Day 2
+  operations), high availability, extensibility, and robustness.
+* Bring another example of a distributed app (using micro-services) to fit those
+  uncovered areas. It should also illustrate the orthogonal to data stores
+  approach, wihch is relying on causality among API-to-API communications being
+  propagated through an example replication topology).
+* Make it human readable :-)
+
+**Thank you all who has provided such valuable feedback via blind reviews!**
+
+# TeX build steps
 
 Debian OS family:
 
@@ -26,7 +37,7 @@ Debian OS family:
 # pdflatex foo.tex
 ```
 
-Via container:
+## Build via a container
 
 ```
 # docker run --rm -it -v $(pwd):/home danteev/texlive:TL2017 \
@@ -41,11 +52,11 @@ locally by hand:
 # docker build .
 ```
 
-# live update for compiled pdf
+## Live update for compiled pdf
 
 Use ``gv -watch foo.pdf``.
 
-# build a ps file to convert it into PDF online
+## Build a ps file to convert it into PDF online
 
 ```
 # docker run --rm -it -v $(pwd):/home bogdando/texlive latexmk -ps foo.tex
